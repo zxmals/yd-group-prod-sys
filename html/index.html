@@ -8,6 +8,12 @@
 	<script src="js/jquery.js"></script>
 	<script src="js/bootstrap.min.js"></script>	
 	<script src="js/bootstrap-select.min.js"></script>	
+	<script src="js/sweetalert.min.js"></script>
+	<style>
+		.swal-overlay {
+ 	 		background-color: #2b7ea577;
+		}
+	</style>
 </head>
 <body>
 	<div class="container-fluid">
@@ -212,6 +218,16 @@ $('#main-nav-h1').click(function(){
 		}else{
 			$(this).css('display','block')
 		}
+	});
+});
+
+$('#main-nav-h li[name="login"]').click(function(){
+	console.log('login')
+	swal("Write something here:", {
+	content: "input",
+	})
+	.then((v) => {
+	swal(`You typed: ${v}`);
 	});
 });
 </script>
