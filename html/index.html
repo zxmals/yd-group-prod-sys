@@ -221,14 +221,36 @@ $('#main-nav-h1').click(function(){
 	});
 });
 
-$('#main-nav-h li[name="login"]').click(function(){
-	console.log('login')
-	swal("Write something here:", {
-	content: "input",
+$('#main-nav-h li[name="login"]').click(function(){	
+	swal("请输入登录账户:", {
+		content: "input",
 	})
-	.then((v) => {
-	swal(`You typed: ${v}`);
-	});
-});
+	.then((uname) => {
+		swal("请输入密码:", {
+			content: {
+				element:"input",
+				attributes: {
+				placeholder: "Type your password",
+				type: "password",
+				},
+			},
+		}).then((passwd)=>{
+			swal(uname,passwd)
+			// $.post()
+			// $.post(url,data,callback,type)
+			return uname=='admin'&&passwd=='admin'?true:false
+		})
+		.then((res)=>{
+			if(res){
+				swal({icon: "success", button: false,});
+			}else{
+				swal({icon: "error", button: false,});
+			}
+		});
+	})
+	
+});	
+
 </script>
+
 </html>
