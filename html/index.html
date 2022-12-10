@@ -36,7 +36,8 @@
 							  </ul>
 
 							  <ul class="nav navbar-nav navbar-right">
-								<li name="login"><a href="#"><font color="white"><span class="glyphicon glyphicon-log-in"></span>&nbsp;&nbsp;登录&nbsp;&nbsp;&nbsp;&nbsp;</font></a></li>
+								<li name="log" act="login"><a href="#"><font color="white"><span class="glyphicon glyphicon-log-in"></span>&nbsp;&nbsp;登录&nbsp;&nbsp;&nbsp;&nbsp;</font></a></li>
+								<li name="log" act="logout" style="display:none ;"><a href="#"><font color="white"><span class="glyphicon glyphicon-log-in"></span>&nbsp;&nbsp;退出&nbsp;&nbsp;&nbsp;&nbsp;</font></a></li>
 							  </ul> 
 							</div><!-- /.navbar-collapse -->
 						  </div><!-- /.container-fluid -->
@@ -191,8 +192,21 @@
 	</div>
 </body>
 <script>
-$('#main-nav-h li[name!="login"]').click(function(){
-	$('#main-nav-h li[name!="login"]').each(function(e){if($(this).hasClass('active')){$(this).removeClass('active');$(this).find('font').attr('color','white')}});
+
+// 
+$(document).ready(function(){
+	if(document.cookie.split('=')[0]=='session'&&document.cookie.split('=')[1].substring(0,2)=='ey'){
+		$('#main-nav-h li[act="login"]').css('display','none')
+		$('#main-nav-h li[act="logout"]').css('display','block')
+	}else{
+		$('#main-nav-h li[act="login"]').css('display','block')
+		$('#main-nav-h li[act="logout"]').css('display','none')
+	}
+});
+
+// 导航栏其他部分交互
+$('#main-nav-h li[name!="log"]').click(function(){
+	$('#main-nav-h li[name!="log"]').each(function(e){if($(this).hasClass('active')){$(this).removeClass('active');$(this).find('font').attr('color','white')}});
 	$(this).addClass("active")
 	$(this).find("font").removeAttr("color")
 	$('#search-all').attr('search-type',$(this).attr('name'))
@@ -208,8 +222,9 @@ $('#main-nav-h li[name!="login"]').click(function(){
 
 });
 
+// 首页按钮
 $('#main-nav-h1').click(function(){
-	$('#main-nav-h li[name!="login"]').each(function(e){if($(this).hasClass('active')){$(this).removeClass('active');$(this).find('font').attr('color','white')}});
+	$('#main-nav-h li[name!="log"]').each(function(e){if($(this).hasClass('active')){$(this).removeClass('active');$(this).find('font').attr('color','white')}});
 	$('#search-all').attr('search-type','main')
 	$('#search-ctg').attr('search-type','main')
 	$('div[data-ts="show-contents"]').each(function(){
@@ -221,7 +236,8 @@ $('#main-nav-h1').click(function(){
 	});
 });
 
-$('#main-nav-h li[name="login"]').click(function(){	
+// 触发登录
+$('#main-nav-h li[act="login"]').click(function(){
 	swal("请输入登录账户:", {
 		content: "input",
 	})
@@ -235,14 +251,16 @@ $('#main-nav-h li[name="login"]').click(function(){
 				},
 			},
 		}).then((passwd)=>{
-			// swal(uname,passwd);
-			// $.post()
-			// $.post(url,data,callback,type)
-			return uname=='admin'&&passwd=='admin'?true:false
+			datas = {username:uname,password:passwd}
+			return $.post('/login',data=datas,function(data,status){
+				return status=='success'?data:false
+			});
 		})
 		.then((res)=>{
 			if(res){
-				swal({icon: "success", button: false,});
+				swal({icon: "success", button: false,});				
+				$(this).css('display','none')
+				$(this).next().css('display','block')
 			}else{
 				swal({icon: "error", button: false,});
 			}
@@ -251,6 +269,33 @@ $('#main-nav-h li[name="login"]').click(function(){
 	
 });	
 
+$('#main-nav-h li[act="logout"]').click(function(){
+	swal({
+		title: "确认退出?",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,		
+	})
+	.then((out) => {		
+		if(out){
+			return $.post('/logout',function(data,status){
+				return status=='success'?data:false
+			});			
+		} else {
+			return false
+		}
+	})
+	.then((res)=>{
+		if(res){
+			swal("已退出...",{icon: "success",});
+			$(this).css('display','none')
+			$(this).prev().css('display','block')
+		}else{
+			swal("没有退出...！");
+		}
+	})
+	
+});	
 </script>
 
 </html>
