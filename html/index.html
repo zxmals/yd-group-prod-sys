@@ -251,7 +251,7 @@ $('#main-nav-h li[act="login"]').click(function(){
 				},
 			},
 		}).then((passwd)=>{
-			datas = {username:uname,password:passwd}
+			datas = {userphone:uname,password:passwd}
 			return $.post('/login',data=datas,function(data,status){
 				return status=='success'?data:false
 			});
@@ -268,7 +268,7 @@ $('#main-nav-h li[act="login"]').click(function(){
 	})
 	
 });	
-
+// 退出登录
 $('#main-nav-h li[act="logout"]').click(function(){
 	swal({
 		title: "确认退出?",
@@ -278,9 +278,7 @@ $('#main-nav-h li[act="logout"]').click(function(){
 	})
 	.then((out) => {		
 		if(out){
-			return $.post('/logout',function(data,status){
-				return status=='success'?data:false
-			});			
+			return $.post('/logout',function(data,status){return status=='success'?data:false});			
 		} else {
 			return false
 		}
