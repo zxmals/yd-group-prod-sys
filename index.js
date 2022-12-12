@@ -46,7 +46,7 @@ app.post('/login',urlencodedParser,function(req,resp){
       resp.cookie('session',respd,{maxAge:1000*60*20})
       resp.send(true)
     }else{
-      res.send(false)
+      resp.send(false)
     }
   });
   conn.end();
