@@ -1,8 +1,8 @@
 var express = require('express'); //导入express框架
 var bodyParser = require('body-parser');  // 引入请求体解析包
 var cookieParser = require('cookie-parser') // 引入cookie解析包
-var connection = require('./db_conn')
-var md5 = require('md5')
+var connection = require('./db_conn')  //引入数据库连接类
+var md5 = require('md5')  //引入MD5包
 var util = require('util'); //引入工具包
 var path = require('path'); //引入文件路径处理包
 
@@ -13,6 +13,7 @@ app.use(express.static(path.join(__dirname,'./html/public')))
 // cookie解析
 app.use(cookieParser())
 
+// 创建连接对象
 var connects = new connection();
 
 // post请求体数据解析
@@ -30,7 +31,7 @@ app.post('/login',urlencodedParser,function(req,resp){
   conn.connect()
   var sql = "select username from grp_user where userphone=? and passwd=?"
   var query_param = [req.body.userphone,md5(req.body.password)]
-  conn.query(sql,query_param,function (err,res) {
+  conn.query(sql,query_param,function (err,res){
     if(err){
       console.log(err.message);
       return;

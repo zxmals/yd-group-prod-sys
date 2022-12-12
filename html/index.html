@@ -46,7 +46,7 @@
 			</nav>
 		</div>
 		<div class="row" style="padding-top: 53px;display: true;">
-			<div style="position:fixed;background:linear-gradient(#88c9e7,#1e6374);text-align: center;border-radius: 0.45em;width: 17%;">
+			<div style="position:fixed;background:linear-gradient(#88c9e7,#1e6374);text-align: center;border-radius: 0.45em;width: 17%;"  id="left-nav">
 				<hr style="border: 0ch;">
 				<strong><font size="4px">全局查询</font></strong>
 				<hr style="border-style: groove;" />
@@ -124,6 +124,7 @@
 				<div class="row"><button type="button" class="btn btn-primary " id="search-ctg" search-type="main">提交分类查询</button></div>
 				<hr >
 			</div>
+			
 			<!-- 展示首页-所有查询 -->
 			<div style="left: 17%;width: 83%;position: relative;display: block;" data-id="main" data-ts="show-contents">
 				<span class="label label-success">共为您搜索到123条记录</span>
@@ -158,7 +159,7 @@
 			</div>
 
 			<!-- 代维账单科目 -->
-			<div style="left: 17%;width: 83%;position: relative;display: none;" data-id="wait-item" data-ts="show-contents">
+			<div style="position: relative;display: none;" class="container" data-id="wait-item" data-ts="show-contents">
 				<span class="label label-success">共为您搜索到123条记录</span>
 				<span class="label label-primary"><a href="#"><font color="white">导出下载</font></a> <span class="glyphicon glyphicon-save"></span></span>
 				<div class="list-group">
@@ -216,6 +217,11 @@ $('#main-nav-h li[name!="log"]').click(function(){
 		if($(this).attr('data-id')!=cur_name){
 			$(this).css('display','none')
 		}else{
+			if(cur_name=='wait-item'){
+				$('#left-nav').css('display','none')
+			}else{
+				$('#left-nav').css('display','block')
+			}
 			$(this).css('display','block')
 		}
 	});
