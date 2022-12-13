@@ -22,6 +22,13 @@ $('#main-nav-h li[name!="log"]').click(function(){
 			$(this).css('display','block')
 		}
 	});
+	if($(this).attr('name')=='wait-item'){
+		$.post('/get-witem-info',function(data,status){
+			if(status){
+				console.log(data)
+			}
+		})
+	}
 
 });
 
