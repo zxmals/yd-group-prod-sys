@@ -10,6 +10,7 @@ var app = express();
 
 // 设置静态文件夹
 app.use(express.static(path.join(__dirname,'./html/public')))
+
 // cookie解析
 app.use(cookieParser())
 
@@ -20,9 +21,9 @@ var connects = new connection();
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 // 访问主页
-app.get('/home', function (req, res) {
+app.get('/home', function (req, resp) {
   // console.log("Cookies: " + util.inspect(req.cookies.session));
-  res.sendFile(__dirname+'/html/index.html')
+  resp.sendFile(__dirname+'/html/index.html')
 })
 
 // 用户登录-设置cookie，将登录信息使用base64编码写入session，20分钟过期,admin/admin
@@ -53,9 +54,9 @@ app.post('/login',urlencodedParser,function(req,resp){
 })
 
 // 退出登录 ，注销cookie
-app.post('/logout',function(req,res){
-    res.cookie('session','',{maxAge:0})
-    res.send(true)
+app.post('/logout',function(req,resp){
+    resp.cookie('session','',{maxAge:0})
+    resp.send(true)
 })
 
 
