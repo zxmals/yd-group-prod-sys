@@ -79,14 +79,14 @@ app.post('/get-witem-info',function(req,resp){
       console.log(err.message)
       return
     }
-    console.log(res[0])
+    resp.json(res)
   }
-  execute_sql('select * from witem where op_date=?',[date.format(new Date(),'YYYYMMDD'),],call);
-  resp.send('123123123')
+  execute_sql('select * from witem where op_date=? limit 0,5',[date.format(new Date(),'YYYYMMDD'),],call);
+  
 })
 
 // 服务启动监听端口:7777
-var server = app.listen(7777, function () {
+var server = app.listen(7777, function (){
  
   var host = server.address().address
   var port = server.address().port

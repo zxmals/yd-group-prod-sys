@@ -25,7 +25,20 @@ $('#main-nav-h li[name!="log"]').click(function(){
 	if($(this).attr('name')=='wait-item'){
 		$.post('/get-witem-info',function(data,status){
 			if(status){
-				console.log(data)
+				$('div[data-id="wait-item"] div').remove()
+				data.forEach(function(e){
+					ht = '<div class="list-group"><li  class="list-group-item list-group-item-danger">'
+					ht += e['item_name']+"("+e['item_id']+")"
+					ht += '<li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11</li><li  class="list-group-item list-group-item-warning"><span href="#">当月收入（元）：'
+					ht += e['cur_m_fee']
+					ht += ' </span><span class="glyphicon glyphicon-option-vertical"></span><span href="#">T-1月收入（元）：'
+					ht += e['last_m_fee']
+					ht += ' </span><span class="glyphicon glyphicon-option-vertical"></span><span href="#">T-2月收入（元）：'
+					ht += e['last2_m_fee: 101377.68']
+					ht += ' </span></li></div>'					
+					$('div[data-id="wait-item"]').append(ht)
+					// console.log(e)
+				});
 			}
 		})
 	}
