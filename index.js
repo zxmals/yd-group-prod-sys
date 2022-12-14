@@ -29,14 +29,13 @@ app.get('/home', function (req, resp) {
 
 /**
  *  封装数据库数据查询
- * call 回调函数
+ *  call 回调函数
  **/
 function execute_sql(sql,query_param,call){
-  conn = connects.getconnection()
+  var conn = connects.getconnection()
   conn.connect()
   // var sql = "select username from grp_user where userphone=? and passwd=?"
   // var query_param = [req.body.userphone,md5(req.body.password)]
-  var resu;
   conn.query(sql,query_param,call);
   conn.end()
 }
