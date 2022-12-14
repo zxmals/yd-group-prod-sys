@@ -25,35 +25,56 @@ $('#main-nav-h li[name!="log"]').click(function(){
 	
 	if($(this).attr('name')=='wait-item'){
 		if($('div[data-id="wait-item"] div').attr('data-search')!='true'){
-			$.post('/get-witem-info',function(data,status){
+			$.post('/get-witem-info-cnts',function(data,status){
+				var cnts =  $('div[data-id="wait-item"] span').eq(0)
 				if(status){
-					$('div[data-id="wait-item"] div').remove()
-					data.forEach(function(e){
-						ht = '<div class="list-group" data-search="true"><li  class="list-group-item list-group-item-danger">'
-						ht += e['item_name']+"("+e['item_id']+")"
-						ht += '<li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>  '
-						ht += new Date(Date.parse(e['eff_date'])).toLocaleString().split(' ')[0].replace(/\//g,'-')
-						ht += '</li><li  class="list-group-item list-group-item-warning"><span href="#">'
-						dates = new Date(e['op_date'])
-						ht += dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'
-						ht += '收入（元）：'
-						ht += e['cur_m_fee']!=null?e['cur_m_fee']:""
-						ht += ' </span><span class="glyphicon glyphicon-option-vertical"></span><span href="#">'
-						dates.setMonth(dates.getMonth()-1)
-						ht += dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'
-						ht += '收入（元）：'
-						ht += e['last_m_fee']!=null?e['cur_m_fee']:""
-						ht += ' </span><span class="glyphicon glyphicon-option-vertical"></span><span href="#">'
-						dates.setMonth(dates.getMonth()-1)
-						ht += dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'
-						ht += '收入（元）：'
-						ht += e['last2_m_fee']!=null?e['cur_m_fee']:""
-						ht += ' </span></li></div>'				
-						$('div[data-id="wait-item"]').append(ht)
-						// console.log(e)
-					});
+					cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
+					$.post('/get-witem-info',function(data,status){
+						if(status){
+							$('div[data-id="wait-item"] div').remove()
+							data.forEach(function(e){
+								ht = '<div class="list-group" data-search="true"><li  class="list-group-item list-group-item-danger">'
+								ht += e['item_name']+"("+e['item_id']+")"
+								ht += '<li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>  '
+								ht += new Date(Date.parse(e['eff_date'])).toLocaleString().split(' ')[0].replace(/\//g,'-')
+								ht += '</li><li  class="list-group-item list-group-item-warning"><span href="#">'
+								dates = new Date(e['op_date'])
+								ht += dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'
+								ht += '收入（元）：'
+								ht += e['cur_m_fee']!=null?e['cur_m_fee']:""
+								ht += ' </span><span class="glyphicon glyphicon-option-vertical"></span><span href="#">'
+								dates.setMonth(dates.getMonth()-1)
+								ht += dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'
+								ht += '收入（元）：'
+								ht += e['last_m_fee']!=null?e['cur_m_fee']:""
+								ht += ' </span><span class="glyphicon glyphicon-option-vertical"></span><span href="#">'
+								dates.setMonth(dates.getMonth()-1)
+								ht += dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'
+								ht += '收入（元）：'
+								ht += e['last2_m_fee']!=null?e['cur_m_fee']:""
+								ht += ' </span></li></div>'				
+								$('div[data-id="wait-item"]').append(ht)
+								// console.log(e)
+							});
+						}else{
+							swal('查询错误！')
+						}
+
+						lines = '<nav aria-label="">'
+						lines += '<ul class="pager">'
+						// lines += '<li><a href="/witem-prepage?cur=1">上一页</a></li>'
+						lines += '<li><a href="#">上一页</a></li>'
+						lines += '<li><span>1/'+(Math.ceil(163/5))+'</span></li>'
+						lines += '<li><a href="#" hre-type="turn-page" act="next-page" cur_page="1" >下一页</a></li>'
+						lines += '</ul>'
+						lines += '</nav>'
+
+						$('div[data-id="wait-item"]').append(lines)						
+					});					
+				}else{
+					swal('查询错误！')
 				}
-			})
+			});
 		}
 	}
 

@@ -81,7 +81,18 @@ app.post('/get-witem-info',function(req,resp){
     resp.json(res)
   }
   execute_sql('select * from witem where op_date=? limit 0,5',[date.format(new Date(),'YYYYMMDD'),],call);
-  
+})
+
+// 获取待维护账单科目信息-总记录数
+app.post('/get-witem-info-cnts',function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  execute_sql('select count(1) cnts from witem where op_date=?',[date.format(new Date(),'YYYYMMDD'),],call);
 })
 
 // 服务启动监听端口:7777
