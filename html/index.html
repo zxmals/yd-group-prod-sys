@@ -30,6 +30,7 @@
 							<!-- Collect the nav links, forms, and other content for toggling -->
 							<div class="collapse navbar-collapse" id="main-nav-h">
 							  <ul class="nav navbar-nav">
+								<li name="online_prod"><a href="#"><font color="white">已维护产品</font></a></li>
 								<li name="zb-prod"><a href="#"><font color="white">专线专区</font></a></li>
 								<li name="wait-item"><a href="#"><font color="white">待维账单科目专区</font></a></li>
 								<li name="ald-prod"><a href="#"><font color="white">已下线或已退出矩阵产品专区</font></a></li>								
@@ -124,7 +125,8 @@
 				<div class="row"><button type="button" class="btn btn-primary " id="search-ctg" search-type="main">提交分类查询</button></div>
 				<hr >
 			</div>
-
+			
+<!-- left-nav-item -->
 			<div style="position:fixed;background:linear-gradient(#88c9e7,#1e6374);text-align: center;border-radius: 0.45em;width: 17%;display: none;"  id="left-nav-item">
 				<hr style="border: 0ch;">
 				<strong><font size="4px">全局查询</font></strong>
@@ -192,56 +194,103 @@
 				  </div>								 				
 			</div>
 
+			<!-- 已维护产品专区 -->
+			<div style="left: 17%;width: 83%;position: relative;display: none;" data-id="online_prod" data-ts="show-contents">
+				<span class="label label-success">共为您搜索到0条记录</span>
+				<span class="label label-primary"><a href="#"><font color="white">导出下载</font></a> <span class="glyphicon glyphicon-save"></span></span>
+				<div class="container-fluid">
+					<ul class="list-group">
+						<li  class="list-group-item list-group-item-danger">产品名称1(产品ID) <span class="glyphicon glyphicon-book"></span></li>
+						<li  class="list-group-item list-group-item-info">
+							上线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11
+						</li>
+						<li  class="list-group-item list-group-item-warning">归属层级 <span class="glyphicon glyphicon-asterisk"></span> Vestibulum at eros<span class="glyphicon glyphicon-chevron-right"></span>Vestibulum at eros <span class="glyphicon glyphicon-chevron-right"></span> Vestibulum at eros </li>
+						<a href="#" class="list-group-item list-group-item-info">下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a>
+					</ul>					
+				</div>
+				<nav aria-label="">
+					<ul class="pager">
+						<li><a href="#" hre-type="turn-page" act="pere" data-stypes="online_prod">上一页</a></li>
+						<li><span data-compose="curpage-pages"></span></li>
+						<li><a href="#" hre-type="turn-page" act="next" data-stypes="online_prod">下一页</a></li>
+					</ul>
+				</nav>												
+			</div>	
+
 			<!-- 专线专区 -->
 			<div style="left: 17%;width: 83%;position: relative;display: none;" data-id="zb-prod" data-ts="show-contents">
-				<span class="label label-success">共为您搜索到123条记录</span>
+				<span class="label label-success">共为您搜索到0条记录</span>
 				<span class="label label-primary"><a href="#"><font color="white">导出下载</font></a> <span class="glyphicon glyphicon-save"></span></span>
-				<ul class="list-group">
-					<li  class="list-group-item list-group-item-danger">产品名称1(产品ID) <span class="glyphicon glyphicon-book"></span></li>
-					<li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11</li>
-					<li  class="list-group-item list-group-item-warning">归属层级 <span class="glyphicon glyphicon-asterisk"></span> Vestibulum at eros<span class="glyphicon glyphicon-chevron-right"></span>Vestibulum at eros <span class="glyphicon glyphicon-chevron-right"></span> Vestibulum at eros </li>					
-					<li href="#" class="list-group-item list-group-item-info">
-						<a href="#">下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
-						<a href="#">产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
-						<a href="#">产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
-						<a href="#">管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
-						<a href="#">操作流程 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
-						<a href="#">近期维护 <span class="glyphicon glyphicon-new-window"></span></a>
-					</li>
-				</ul>
-								
+				<div class="container-fluid">
+					<ul class="list-group">
+						<li  class="list-group-item list-group-item-danger">产品名称1(产品ID) <span class="glyphicon glyphicon-book"></span></li>
+						<li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11</li>
+						<li  class="list-group-item list-group-item-warning">归属层级 <span class="glyphicon glyphicon-asterisk"></span> Vestibulum at eros<span class="glyphicon glyphicon-chevron-right"></span>Vestibulum at eros <span class="glyphicon glyphicon-chevron-right"></span> Vestibulum at eros </li>					
+						<li href="#" class="list-group-item list-group-item-info">
+							<a href="#">下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+							<a href="#">产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+							<a href="#">产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+							<a href="#">管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+							<a href="#">操作流程 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+							<a href="#">近期维护 <span class="glyphicon glyphicon-new-window"></span></a>
+						</li>
+					</ul>					
+				</div>
+				<nav aria-label="">
+					<ul class="pager">
+						<li><a href="#" hre-type="turn-page" act="pere" data-stypes="zb-prod">上一页</a></li>
+						<li><span data-compose="curpage-pages"></span></li>
+						<li><a href="#" hre-type="turn-page" act="next" data-stypes="zb-prod">下一页</a></li>
+					</ul>
+				</nav>											
 			</div>
 
 			<!-- 代维账单科目 -->
 			<div style="left: 17%;width: 83%;position: relative;display: none;" class="" data-id="wait-item" data-ts="show-contents">
-				<span class="label label-success">共为您搜索到123条记录</span>
+				<span class="label label-success">共为您搜索到0条记录</span>
 				<span class="label label-primary"><a href="#"><font color="white">导出下载</font></a> <span class="glyphicon glyphicon-save"></span></span>
-				<div class="list-group">
-					<li  class="list-group-item list-group-item-danger">科目名称1(科目ID) <span class="glyphicon glyphicon-book"></span></li>
-					<li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11</li>
-					<li  class="list-group-item list-group-item-warning">
-						<span href="#">当月收入（元）：2222 </span><span class="glyphicon glyphicon-option-vertical"></span>
-						<span href="#">T-1月收入（元）：3333 </span><span class="glyphicon glyphicon-option-vertical"></span>
-						<span href="#">T-2月收入（元）：4444 </span>
-					</li>
+				<div class="container-fluid">
+					<div class="list-group">
+						<li  class="list-group-item list-group-item-danger">科目名称1(科目ID) <span class="glyphicon glyphicon-book"></span></li>
+						<li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>  </li>
+						<li  class="list-group-item list-group-item-warning">
+							<span href="#">当月收入（元）： </span><span class="glyphicon glyphicon-option-vertical"></span>
+							<span href="#">T-1月收入（元）： </span><span class="glyphicon glyphicon-option-vertical"></span>
+							<span href="#">T-2月收入（元）： </span>
+						</li>
+					</div>					
 				</div>
-
+				<nav aria-label="">
+					<ul class="pager">
+						<li><a href="#" hre-type="turn-page" act="pere" data-stypes="witem">上一页</a></li>
+						<li><span data-compose="curpage-pages"></span></li>
+						<li><a href="#" hre-type="turn-page" act="next" data-stypes="witem">下一页</a></li>
+					</ul>
+				</nav>
 			</div>		
 			
 			<!-- 已下线或已退出矩阵产品专区 -->
 			<div style="left: 17%;width: 83%;position: relative;display: none;" data-id="ald-prod" data-ts="show-contents">
-				<span class="label label-success">共为您搜索到123条记录</span>
+				<span class="label label-success">共为您搜索到0条记录</span>
 				<span class="label label-primary"><a href="#"><font color="white">导出下载</font></a> <span class="glyphicon glyphicon-save"></span></span>
-				<ul class="list-group">
-					<li  class="list-group-item list-group-item-danger">产品名称1(产品ID) <span class="glyphicon glyphicon-book"></span></li>
-					<li  class="list-group-item list-group-item-info">
-						上线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11<span class="glyphicon glyphicon-option-vertical"></span>
-						下线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11
-					</li>
-					<li  class="list-group-item list-group-item-warning">原归属层级 <span class="glyphicon glyphicon-asterisk"></span> Vestibulum at eros<span class="glyphicon glyphicon-chevron-right"></span>Vestibulum at eros <span class="glyphicon glyphicon-chevron-right"></span> Vestibulum at eros </li>
-					<a href="#" class="list-group-item list-group-item-info">原下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a>
-				</ul>			
-								
+				<div class="container-fluid">
+					<ul class="list-group">
+						<li  class="list-group-item list-group-item-danger">产品名称1(产品ID) <span class="glyphicon glyphicon-book"></span></li>
+						<li  class="list-group-item list-group-item-info">
+							上线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11<span class="glyphicon glyphicon-option-vertical"></span>
+							下线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11
+						</li>
+						<li  class="list-group-item list-group-item-warning">原归属层级 <span class="glyphicon glyphicon-asterisk"></span> Vestibulum at eros<span class="glyphicon glyphicon-chevron-right"></span>Vestibulum at eros <span class="glyphicon glyphicon-chevron-right"></span> Vestibulum at eros </li>
+						<a href="#" class="list-group-item list-group-item-info">原下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a>
+					</ul>	
+				</div>
+				<nav aria-label="">
+					<ul class="pager">
+						<li><a href="#" hre-type="turn-page" act="pere" data-stypes="ald-prod">上一页</a></li>
+						<li><span data-compose="curpage-pages"></span></li>
+						<li><a href="#" hre-type="turn-page" act="next" data-stypes="ald-prod">下一页</a></li>
+					</ul>
+				</nav>											
 			</div>				
 		</div>
 	</div>

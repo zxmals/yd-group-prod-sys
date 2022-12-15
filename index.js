@@ -71,6 +71,10 @@ app.post('/logout',function(req,resp){
     resp.send(true)
 })
 
+
+/**
+ * 待维护账单科目专区
+ ***/
 // 获取待维护账单科目信息
 app.post('/get-witem-info',function(req,resp){
   var call = function(err,res){
@@ -93,7 +97,26 @@ app.post('/get-witem-info-cnts',function(req,resp){
     resp.json(res)
   }
   execute_sql('select count(1) cnts from witem where op_date=?',[date.format(new Date(),'YYYYMMDD'),],call);
-})
+});
+
+
+// 关键字查询-获取待维护账单科目信息-总记录数
+app.post('/search-items-cnts',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  var key_words = req.body.keyw
+  execute_sql('select count(1) cnts from witem where op_date=? and (item_name like \'%$%\' or item_id like \'%$%\') '.replace('$',key_words),[date.format(new Date(),'YYYYMMDD'),key_words,key_words,],call);
+});
+
+
+
+
+
 
 // 服务启动监听端口:7777
 var server = app.listen(7777, function (){

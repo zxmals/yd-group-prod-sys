@@ -24,14 +24,17 @@ $('#main-nav-h li[name!="log"]').click(function(){
 	});
 	
 	if($(this).attr('name')=='wait-item'){
-		if($('div[data-id="wait-item"] div').attr('data-search')!='true'){
+		if($('div[data-id="wait-item"] .container-fluid div').attr('data-search')!='true'){
+			swal('加载中……',{button:false});
 			$.post('/get-witem-info-cnts',function(data,status){
 				var cnts =  $('div[data-id="wait-item"] span').eq(0)
 				if(status){
 					cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
+					row_cnts = data[0]['cnts']
 					$.post('/get-witem-info',function(data,status){
 						if(status){
-							$('div[data-id="wait-item"] div').remove()
+							$('div[data-id="wait-item"] .container-fluid div').remove()
+							// $('div[data-id="wait-item"] nav').remove()
 							data.forEach(function(e){
 								ht = '<div class="list-group" data-search="true"><li  class="list-group-item list-group-item-danger">'
 								ht += e['item_name']+"("+e['item_id']+")"
@@ -53,32 +56,48 @@ $('#main-nav-h li[name!="log"]').click(function(){
 								ht += '收入（元）：'
 								ht += e['last2_m_fee']!=null?e['cur_m_fee']:""
 								ht += ' </span></li></div>'				
-								$('div[data-id="wait-item"]').append(ht)
+								$('div[data-id="wait-item"] .container-fluid').append(ht)
 								// console.log(e)
 							});
 						}else{
-							swal('查询错误！')
+							swal('查询错误！',{button:false})
 						}
 
-						lines = '<nav aria-label="">'
-						lines += '<ul class="pager">'
-						// lines += '<li><a href="/witem-prepage?cur=1">上一页</a></li>'
-						lines += '<li><a href="#">上一页</a></li>'
-						lines += '<li><span>1/'+(Math.ceil(163/5))+'</span></li>'
-						lines += '<li><a href="#" hre-type="turn-page" act="next-page" cur_page="1" >下一页</a></li>'
-						lines += '</ul>'
-						lines += '</nav>'
+						// lines += '<li><span>1/'+(Math.ceil(row_cnts/5))+'</span></li>'						
+						$('a[hre-type][data-stypes="witem"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
+						$('a[hre-type][data-stypes="witem"]').eq(0).attr('cur-page','1')
+						$('a[hre-type][data-stypes="witem"]').eq(1).attr('cur-page','1')
 
-						$('div[data-id="wait-item"]').append(lines)						
+						swal.close();
 					});					
 				}else{
-					swal('查询错误！')
+					swal('查询错误！',{button:false})
 				}
 			});
 		}
 	}
 
 });
+
+// 待维护账单科目-全局查询
+$('#search-item').click(function(){
+	key_words = $('#search-item').parent().prev().val()
+	$.post('/search-items-cnts',{keyw:key_words},function(data,status){
+		if(status){
+			console.log(data)
+		}else{
+			swal('查询错误！',{button:false});
+		}
+	});	
+});
+
+// 分页管理
+$('a[hre-type="turn-page"]').click(function(){
+	var page_type = $(this).attr('data-stypes');
+	if(page_type=="witem"){
+		console.log('-------------------page-man-witem--------------------')
+	}
+});	
 
 // 首页按钮
 $('#main-nav-h1').click(function(){
