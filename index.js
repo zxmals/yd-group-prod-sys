@@ -96,12 +96,12 @@ app.post('/get-witem-info-cnts',function(req,resp){
     }
     resp.json(res)
   }
-  execute_sql('select count(1) cnts from witem where op_date=?',[date.format(new Date(),'YYYYMMDD'),],call);
+  execute_sql("select count(1) cnts from witem where op_date=?",[date.format(new Date(),'YYYYMMDD'),],call);
 });
 
 
 // 关键字查询-获取待维护账单科目信息-总记录数
-app.post('/search-items-cnts',urlencodedParser,function(req,resp){
+app.post('/search-items-ky-cnts',urlencodedParser,function(req,resp){
   var call = function(err,res){
     if(err){
       console.log(err.message)
@@ -109,11 +109,24 @@ app.post('/search-items-cnts',urlencodedParser,function(req,resp){
     }
     resp.json(res)
   }
+  // var key_words = escape(req.body.keyw)
   var key_words = req.body.keyw
-  execute_sql('select count(1) cnts from witem where op_date=? and (item_name like \'%$%\' or item_id like \'%$%\') '.replace('$',key_words),[date.format(new Date(),'YYYYMMDD'),key_words,key_words,],call);
+  execute_sql("select count(1) cnts from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') ",[date.format(new Date(),'YYYY-MM-DD'),],call);
 });
 
-
+// 关键字查询-获取待维护账单科目信息
+app.post('/search-items-ky',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  // var key_words = escape(req.body.keyw)
+  var key_words = req.body.keyw
+  execute_sql("select * from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') order by (cur_m_fee+last_m_fee+last2_m_fee) desc limit 0,5",[date.format(new Date(),'YYYY-MM-DD'),],call);
+});
 
 
 
