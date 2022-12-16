@@ -1,3 +1,6 @@
+item_key_words = ""
+
+// 设置待维护账单科目 html 部分
 function append_item_html(item_name,item_id,eff_date,op_date,cur_m_fee,last_m_fee,last2_m_fee){
 	var ht=""
 	ht = '<div class="list-group" data-search="true"><li  class="list-group-item list-group-item-danger">'
@@ -87,10 +90,11 @@ $('#main-nav-h li[name!="log"]').click(function(){
 
 // 待维护账单科目-全局查询
 $('#search-item').click(function(){
-	key_words = $('#search-item').parent().prev().val()
+	key_words = $(this).parent().prev().val()
 	$.post('/search-items-ky-cnts',{keyw:key_words},function(data,status){
 		var cnts =  $('div[data-id="wait-item"] span').eq(0)
 		if(status){
+			swal('加载中……',{button:false});
 			cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
 			row_cnts = data[0]['cnts']
 			$('div[data-id="wait-item"] .container-fluid div').remove()
@@ -104,6 +108,9 @@ $('#search-item').click(function(){
 					$('a[hre-type][data-stypes="witem"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 					$('a[hre-type][data-stypes="witem"]').eq(0).attr('cur-page','1')
 					$('a[hre-type][data-stypes="witem"]').eq(1).attr('cur-page','1')
+
+					swal.close()
+					item_key_words = key_words
 				}else{
 					swal('查询错误！',{button:false});
 				}
@@ -111,15 +118,70 @@ $('#search-item').click(function(){
 		}else{
 			swal('查询错误！',{button:false});
 		}
-	});	
+	});
+
 });
 
 // 分页管理
 $('a[hre-type="turn-page"]').click(function(){
 	var page_type = $(this).attr('data-stypes');
+
+	// 待维护账单科目-分页管理
 	if(page_type=="witem"){
-		console.log('-------------------page-man-witem--------------------')
+		$('#search-item').parent().prev().val(item_key_words)
+		// console.log('-------------------page-man-witem--------------------')
+		if($(this).attr('act')=='pere'){
+			// console.log('-----------------pere--------------------')
+			sum_pages = parseInt($(this).parent().next().children().text().split('\/')[1])
+			cur_page = parseInt($(this).attr('cur-page'))
+			post_data = {keyw:item_key_words,sum_pages:sum_pages,cur_page:cur_page}
+			if($(this).attr('cur-page')>1&&cur_page<=sum_pages){
+				swal('加载中……',{button:false});
+				$.post('/pere-witem-page',post_data,function(data,status){
+					if(status){
+						$('div[data-id="wait-item"] .container-fluid div').remove()						
+						data.forEach(function(e){
+							ht = append_item_html(e['item_name'],e['item_id'],e['eff_date'],e['op_date'],e['cur_m_fee'],e['last_m_fee'],e['last2_m_fee'])
+							$('div[data-id="wait-item"] .container-fluid').append(ht)
+							// console.log(e)
+						});
+						$('a[hre-type][data-stypes="witem"]').eq(0).parent().next().children().text((parseInt(cur_page)-1)+'/'+sum_pages).end()
+						$('a[hre-type][data-stypes="witem"]').eq(0).attr('cur-page',(parseInt(cur_page)-1))
+						$('a[hre-type][data-stypes="witem"]').eq(1).attr('cur-page',(parseInt(cur_page)-1))						
+						swal.close();
+					}else{
+						swal('查询错误！',{button:false});
+					}
+				});
+			}
+		}else if($(this).attr('act')=='next'){
+			// console.log('-----------------next--------------------')
+			sum_pages = parseInt($(this).parent().prev().children().text().split('\/')[1])
+			cur_page = parseInt($(this).attr('cur-page'))
+			post_data = {keyw:item_key_words,sum_pages:sum_pages,cur_page:cur_page}
+			if(cur_page<sum_pages){
+				swal('加载中……',{button:false});
+				$.post('/next-witem-page',post_data,function(data,status){
+					if(status){
+						$('div[data-id="wait-item"] .container-fluid div').remove()						
+						data.forEach(function(e){
+							ht = append_item_html(e['item_name'],e['item_id'],e['eff_date'],e['op_date'],e['cur_m_fee'],e['last_m_fee'],e['last2_m_fee'])
+							$('div[data-id="wait-item"] .container-fluid').append(ht)
+							// console.log(e)
+						});
+						$('a[hre-type][data-stypes="witem"]').eq(0).parent().next().children().text((parseInt(cur_page)+1)+'/'+sum_pages).end()
+						$('a[hre-type][data-stypes="witem"]').eq(0).attr('cur-page',(parseInt(cur_page)+1))
+						$('a[hre-type][data-stypes="witem"]').eq(1).attr('cur-page',(parseInt(cur_page)+1))
+						swal.close();
+					}else{
+						swal('查询错误！',{button:false});
+					}
+				});				
+			}
+		}
 	}
+
+
 });	
 
 // 首页按钮

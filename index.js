@@ -28,8 +28,8 @@ app.get('/home', function (req, resp) {
 })
 
 /**
- *  封装数据库数据查询
- *  call 回调函数
+ *  封装数据库SQL查询
+ *  call ： 回调函数
  **/
 function execute_sql(sql,query_param,call){
   var conn = connects.getconnection()
@@ -74,7 +74,10 @@ app.post('/logout',function(req,resp){
 
 /**
  * 待维护账单科目专区
+ * 数据日期使用前一天，避免同步不及时导致无数据展示
+ * 
  ***/
+
 // 获取待维护账单科目信息
 app.post('/get-witem-info',function(req,resp){
   var call = function(err,res){
@@ -84,7 +87,9 @@ app.post('/get-witem-info',function(req,resp){
     }
     resp.json(res)
   }
-  execute_sql('select * from witem where op_date=? limit 0,5',[date.format(new Date(),'YYYYMMDD'),],call);
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql('select * from witem where op_date=? order by (cur_m_fee+last_m_fee+last2_m_fee) desc limit 0,5',[date.format(dates,'YYYYMMDD'),],call);
 })
 
 // 获取待维护账单科目信息-总记录数
@@ -96,7 +101,9 @@ app.post('/get-witem-info-cnts',function(req,resp){
     }
     resp.json(res)
   }
-  execute_sql("select count(1) cnts from witem where op_date=?",[date.format(new Date(),'YYYYMMDD'),],call);
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)  
+  execute_sql("select count(1) cnts from witem where op_date=?",[date.format(dates,'YYYYMMDD'),],call);
 });
 
 
@@ -111,7 +118,9 @@ app.post('/search-items-ky-cnts',urlencodedParser,function(req,resp){
   }
   // var key_words = escape(req.body.keyw)
   var key_words = req.body.keyw
-  execute_sql("select count(1) cnts from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') ",[date.format(new Date(),'YYYY-MM-DD'),],call);
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)    
+  execute_sql("select count(1) cnts from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') ",[date.format(dates,'YYYY-MM-DD'),],call);
 });
 
 // 关键字查询-获取待维护账单科目信息
@@ -125,11 +134,44 @@ app.post('/search-items-ky',urlencodedParser,function(req,resp){
   }
   // var key_words = escape(req.body.keyw)
   var key_words = req.body.keyw
-  execute_sql("select * from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') order by (cur_m_fee+last_m_fee+last2_m_fee) desc limit 0,5",[date.format(new Date(),'YYYY-MM-DD'),],call);
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)      
+  execute_sql("select * from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') order by (cur_m_fee+last_m_fee+last2_m_fee) desc limit 0,5",[date.format(dates,'YYYY-MM-DD'),],call);
 });
 
+// 分页查询-上一页
+app.post('/pere-witem-page',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  var key_words = req.body.keyw
+  var cur_page = parseInt(req.body.cur_page)
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)   
+  sql = "select * from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') order by (cur_m_fee+last_m_fee+last2_m_fee) desc limit ?,?"
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),((cur_page-2)*5),5,],call)
+});
 
-
+// 分页查询-下一页
+app.post('/next-witem-page',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  var key_words = req.body.keyw
+  var cur_page = parseInt(req.body.cur_page)
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  sql = "select * from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') order by (cur_m_fee+last_m_fee+last2_m_fee) desc limit ?,?"
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),(cur_page*5),5,],call)
+});
 
 // 服务启动监听端口:7777
 var server = app.listen(7777, function (){
