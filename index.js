@@ -6,6 +6,7 @@ var md5 = require('md5')  //引入MD5包
 var date = require("silly-datetime") //引入时间获取模块
 var util = require('util'); //引入工具包
 var path = require('path'); //引入文件路径处理包
+var xlsx = require("node-xlsx");
 
 var app = express();
 
@@ -171,6 +172,23 @@ app.post('/next-witem-page',urlencodedParser,function(req,resp){
   dates.setDate(dates.getDate()-1)
   sql = "select * from witem where op_date=? and (item_name like '%"+key_words+"%' or item_id like '%"+key_words+"%') order by (cur_m_fee+last_m_fee+last2_m_fee) desc limit ?,?"
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),(cur_page*5),5,],call)
+});
+
+
+app.get('/download-witem',function(req,resp){
+  filename = '111.xlsx'
+  resp.set({'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename='+filename})
+  var list = [
+    {
+      name: "sheet",
+      data: [
+        ["data1", "data2", "data3"],
+        ["data1", "data2", "data3"],
+        ["data1", "data2", "data3"],
+      ],
+    },
+  ];
+  resp.send(xlsx.build(list))
 });
 
 // 服务启动监听端口:7777

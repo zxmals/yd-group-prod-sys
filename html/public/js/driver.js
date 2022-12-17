@@ -1,3 +1,4 @@
+// 预定义 待维护账单科目全局搜索关键字，防止分页查询时中途插入关键字影响
 item_key_words = ""
 
 // 设置待维护账单科目 html 部分
@@ -50,7 +51,7 @@ $('#main-nav-h li[name!="log"]').click(function(){
 			$(this).css('display','block')
 		}
 	});
-	
+	// 导航栏 点击 待维护账单科目
 	if($(this).attr('name')=='wait-item'){
 		if($('div[data-id="wait-item"] .container-fluid div').attr('data-search')!='true'){
 			swal('加载中……',{button:false});
@@ -71,14 +72,13 @@ $('#main-nav-h li[name!="log"]').click(function(){
 						}else{
 							swal('查询错误！',{button:false})
 						}
-
-						// lines += '<li><span>1/'+(Math.ceil(row_cnts/5))+'</span></li>'						
+						
 						$('a[hre-type][data-stypes="witem"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 						$('a[hre-type][data-stypes="witem"]').eq(0).attr('cur-page','1')
 						$('a[hre-type][data-stypes="witem"]').eq(1).attr('cur-page','1')
 
 						swal.close();
-					});					
+					});
 				}else{
 					swal('查询错误！',{button:false})
 				}
@@ -103,7 +103,6 @@ $('#search-item').click(function(){
 					data.forEach(function(e){
 						ht = append_item_html(e['item_name'],e['item_id'],e['eff_date'],e['op_date'],e['cur_m_fee'],e['last_m_fee'],e['last2_m_fee'])
 						$('div[data-id="wait-item"] .container-fluid').append(ht)
-						// console.log(e)
 					});
 					$('a[hre-type][data-stypes="witem"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 					$('a[hre-type][data-stypes="witem"]').eq(0).attr('cur-page','1')
@@ -122,6 +121,14 @@ $('#search-item').click(function(){
 
 });
 
+// 下载管理
+$('div[data-ts="show-contents"] span').click(function(){
+	if($(this).parent().attr('data-id')=='wait-item'&&$(this).find('font').text()=='导出下载'){
+		console.log('--------------------witem-download---------------------------')
+		window.open('/download-witem')
+	}
+});
+
 // 分页管理
 $('a[hre-type="turn-page"]').click(function(){
 	var page_type = $(this).attr('data-stypes');
@@ -131,7 +138,7 @@ $('a[hre-type="turn-page"]').click(function(){
 		$('#search-item').parent().prev().val(item_key_words)
 		// console.log('-------------------page-man-witem--------------------')
 		if($(this).attr('act')=='pere'){
-			// console.log('-----------------pere--------------------')
+			// console.log('-----------------pere---上一页-----------------')
 			sum_pages = parseInt($(this).parent().next().children().text().split('\/')[1])
 			cur_page = parseInt($(this).attr('cur-page'))
 			post_data = {keyw:item_key_words,sum_pages:sum_pages,cur_page:cur_page}
@@ -143,7 +150,6 @@ $('a[hre-type="turn-page"]').click(function(){
 						data.forEach(function(e){
 							ht = append_item_html(e['item_name'],e['item_id'],e['eff_date'],e['op_date'],e['cur_m_fee'],e['last_m_fee'],e['last2_m_fee'])
 							$('div[data-id="wait-item"] .container-fluid').append(ht)
-							// console.log(e)
 						});
 						$('a[hre-type][data-stypes="witem"]').eq(0).parent().next().children().text((parseInt(cur_page)-1)+'/'+sum_pages).end()
 						$('a[hre-type][data-stypes="witem"]').eq(0).attr('cur-page',(parseInt(cur_page)-1))
@@ -155,7 +161,7 @@ $('a[hre-type="turn-page"]').click(function(){
 				});
 			}
 		}else if($(this).attr('act')=='next'){
-			// console.log('-----------------next--------------------')
+			// console.log('-----------------next----下一页----------------')
 			sum_pages = parseInt($(this).parent().prev().children().text().split('\/')[1])
 			cur_page = parseInt($(this).attr('cur-page'))
 			post_data = {keyw:item_key_words,sum_pages:sum_pages,cur_page:cur_page}
@@ -217,9 +223,7 @@ $('#main-nav-h li[act="login"]').click(function(){
 			},
 		}).then((passwd)=>{
 			datas = {userphone:uname,password:passwd}
-			return $.post('/login',data=datas,function(data,status){
-				return status=='success'?data:false
-			});
+			return $.post('/login',data=datas,function(data,status){return status=='success'?data:false});
 		})
 		.then((res)=>{
 			if(res){
