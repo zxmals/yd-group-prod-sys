@@ -174,21 +174,32 @@ app.post('/next-witem-page',urlencodedParser,function(req,resp){
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),(cur_page*5),5,],call)
 });
 
-
-app.get('/download-witem',function(req,resp){
-  filename = '111.xlsx'
+// 导出下载-待维护账单科目明细/不用本地保存，生成字节流直接下载
+app.get('/download-witem',function(req,resp){  
+  filename = encodeURIComponent('待维护账单科目明细.xlsx')
   resp.set({'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename='+filename})
-  var list = [
-    {
-      name: "sheet",
-      data: [
-        ["data1", "data2", "data3"],
-        ["data1", "data2", "data3"],
-        ["data1", "data2", "data3"],
-      ],
-    },
-  ];
-  resp.send(xlsx.build(list))
+  dates = new Date()
+  date1 = dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'
+  dates.setMonth(dates.getMonth()-1)
+  date2 = dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'
+  dates.setMonth(dates.getMonth()-1)
+  date3 = dates.getFullYear()+'年'+(dates.getMonth()+1)+'月'  
+  data = []
+  data.push(['账单科目名称','账单科目编码','上线时间',date1+'收入(元)',date2+'收入(元)',date3+'收入(元)'])  
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    res.forEach(function(e){
+      data.push([e['item_name'],e['item_id'],e['eff_date'],e['cur_m_fee'],e['last_m_fee'],e['last2_m_fee']]);
+    });
+    resp.send(xlsx.build([{'name':'sheet1',data:data}]))
+  }
+  sql = "select * from witem where op_date=? order by (cur_m_fee+last_m_fee+last2_m_fee) desc"
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)  
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
 });
 
 // 服务启动监听端口:7777
