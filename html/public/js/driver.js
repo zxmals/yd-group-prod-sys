@@ -9,6 +9,8 @@ $(document).ready(function(){
 		$('#main-nav-h li[act="login"]').css('display','block')
 		$('#main-nav-h li[act="logout"]').css('display','none')
 	}
+
+	// 加载前台五级分类数据并设置
 	swal('加载中……',{button:false})
 	$.post('/getctginfo',function(data,status){
 		if(status){
@@ -41,6 +43,113 @@ $(document).ready(function(){
 		swal.close()
 	});
 
+	// select-change-events  分类选择器监听 ，多层级菜单联动,向下联动
+	function down_ch_select(id,catgs){
+		pid = []
+		$('#select'+id+' option').each(function(e){
+			if($(this).attr('data-divider')==true){$(this).prop('selected',true)}
+			if(catgs.filter((e)=>{return e==$(this).attr('parent_id')}).length==0){
+				$(this).prop('disabled',true)				
+				$(this).removeAttr('style')
+			}else{$(this).prop('disabled',false);$(this).css('background-color','#88c9e7');pid.push($(this).attr('catg_id'))}
+			
+		});
+		return pid
+	}
+
+	// select-change-events  分类选择器监听 ，多层级菜单联动,向上联动
+	function up_ch_select(id,partents){
+		pid = []
+		$('#select'+id+' option').each(function(e){
+			if($(this).attr('data-divider')==true){$(this).prop('selected',true)}
+			if(partents.filter((e)=>{return e==$(this).attr('catg_id')}).length==0){
+				$(this).prop('disabled',true)
+				$(this).removeAttr('style')
+			}else{$(this).prop('disabled',false);$(this).css('background-color','#88c9e7');pid.push($(this).attr('parent_id'))}
+		});
+		return pid
+	}
+
+	// select-change-events  分类选择器监听 ，多层级菜单联动
+	function update_selector(selid,catg_id,parent_id){
+		if(selid=='select1'){
+			pid = []
+			pid.push(catg_id)
+			pid = down_ch_select(2,pid)
+			pid = down_ch_select(3,pid)
+			pid = down_ch_select(4,pid)
+			pid = down_ch_select(5,pid)						
+		}
+
+		if(selid=='select2'){
+			// down
+			pid = []
+			pid.push(catg_id)
+			pid = down_ch_select(3,pid)
+			pid = down_ch_select(4,pid)
+			pid = down_ch_select(5,pid)	
+			// up
+			pid = []
+			pid.push(parent_id)
+			pid = up_ch_select(1,pid)						
+		}
+
+		if(selid=='select3'){
+			// down
+			pid = []
+			pid.push(catg_id)
+			pid = down_ch_select(4,pid)
+			pid = down_ch_select(5,pid)	
+			// up
+			pid = []
+			pid.push(parent_id)
+			pid = up_ch_select(2,pid)
+			pid = up_ch_select(1,pid)							
+		}
+
+		if(selid=='select4'){
+			// down
+			pid = []
+			pid.push(catg_id)
+			pid = down_ch_select(5,pid)	
+			// up
+			pid = []
+			pid.push(parent_id)
+			pid = up_ch_select(3,pid)
+			pid = up_ch_select(2,pid)
+			pid = up_ch_select(1,pid)						
+		}
+
+		if(selid=='select5'){
+			// up
+			pid = []
+			pid.push(parent_id)
+			pid = up_ch_select(4,pid)
+			pid = up_ch_select(3,pid)
+			pid = up_ch_select(2,pid)
+			pid = up_ch_select(1,pid)						
+		}
+		$('.selectpicker').selectpicker('refresh')
+	}
+	// select-change-events  分类选择器监听
+	$('.selectpicker').change(function(){
+		catg_id = $(this).find('option:selected').attr('catg_id')
+		parent_id = $(this).find('option:selected').attr('parent_id')
+		selid =  $(this).attr('id')
+		update_selector(selid,catg_id,parent_id)
+	});
+
+});
+
+
+// 重置分类选项
+$('#reset-ctg').click(function(){
+	$('.selectpicker option[data-divider=true]').prop('selected',true)
+	$('.selectpicker option').each(function(e){
+		$(this).prop('disabled',false)
+		$(this).removeAttr('style')
+	});
+	$('.selectpicker').selectpicker('refresh')
 });
 
 // 设置待维护账单科目 html 部分

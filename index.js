@@ -243,7 +243,7 @@ app.post('/getctginfo',function(req,resp){
     execute_sql(sql,[max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),],call)    
   }
   dates = new Date()
-  dates.setDate(dates.getDate()-1)  
+  dates.setDate(dates.getDate()-1)
   sql = "select max(op_time)op_time from ent_product_ctg where op_date=? "
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
 });
