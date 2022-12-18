@@ -1,6 +1,48 @@
 // 预定义 待维护账单科目全局搜索关键字，防止分页查询时中途插入关键字影响
 item_key_words = ""
 
+$(document).ready(function(){
+	if(document.cookie.split('=')[0]=='session'&&document.cookie.split('=')[1].substring(0,2)=='ey'){
+		$('#main-nav-h li[act="login"]').css('display','none')
+		$('#main-nav-h li[act="logout"]').css('display','block')
+	}else{
+		$('#main-nav-h li[act="login"]').css('display','block')
+		$('#main-nav-h li[act="logout"]').css('display','none')
+	}
+	swal('加载中……',{button:false})
+	$.post('/getctginfo',function(data,status){
+		if(status){
+			$('#select1 option').remove()
+			$('#select2 option').remove()
+			$('#select3 option').remove()
+			$('#select4 option').remove()
+			$('#select5 option').remove()
+			ctg1 = '<option data-divider="true">产品费项矩阵一级</option>'
+			ctg2 = '<option data-divider="true">产品费项矩阵二级</option>'
+			ctg3 = '<option data-divider="true">产品费项矩阵三级</option>'
+			ctg4 = '<option data-divider="true">产品费项矩阵四级</option>'
+			ctg5 = '<option data-divider="true">产品费项矩阵五级</option>'			
+			data.forEach(function(e){
+				ctg1 += ctg1.indexOf(e['catg_id1'])<0 && e['catg_id2']!=null?'<option catg_id="'+e['catg_id1']+'">'+e['catg_name1']+'</option>':""
+				ctg2 += ctg2.indexOf(e['catg_id2'])<0 && e['catg_id2']!=null?'<option catg_id="'+e['catg_id2']+'" parent_id="'+e['parent_id1']+'">'+e['catg_name2']+'</option>':""
+				ctg3 += ctg3.indexOf(e['catg_id3'])<0 && e['catg_id3']!=null?'<option catg_id="'+e['catg_id3']+'" parent_id="'+e['parent_id2']+'">'+e['catg_name3']+'</option>':""
+				ctg4 += ctg4.indexOf(e['catg_id4'])<0 && e['catg_id4']!=null?'<option catg_id="'+e['catg_id4']+'" parent_id="'+e['parent_id3']+'">'+e['catg_name4']+'</option>':""
+				ctg5 += ctg5.indexOf(e['catg_id5'])<0 && e['catg_id5']!=null?'<option catg_id="'+e['catg_id5']+'" biz_code='+e['biz_code']+' parent_id="'+e['parent_id4']+'">'+e['catg_name5']+'</option>':""
+			});
+			$('#select1').append(ctg1)
+			$('#select2').append(ctg2)
+			$('#select3').append(ctg3)
+			$('#select4').append(ctg4)
+			$('#select5').append(ctg5)
+			$('.selectpicker').selectpicker('refresh');
+		}else{
+			swal('加载出错，请重新进入！',{button:false})
+		}
+		swal.close()
+	});
+
+});
+
 // 设置待维护账单科目 html 部分
 function append_item_html(item_name,item_id,eff_date,op_date,cur_m_fee,last_m_fee,last2_m_fee){
 	var ht=""
@@ -86,6 +128,16 @@ $('#main-nav-h li[name!="log"]').click(function(){
 		}
 	}
 
+	// 导航栏 点击 已维护产品
+	if($(this).attr('name')=='online_prod'){
+		
+	}
+
+	// 导航栏 点击 专线专区
+	if($(this).attr('name')=='zb-prod'){}
+
+	// 导航栏 点击 已下线或已退出矩阵产品专区
+	if($(this).attr('name')=='ald-prod'){}			
 });
 
 // 待维护账单科目-全局查询

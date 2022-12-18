@@ -1,14 +1,20 @@
-var express = require('express'); //导入express框架
-var bodyParser = require('body-parser');  // 引入请求体解析包
-var cookieParser = require('cookie-parser') // 引入cookie解析包
-var connection = require('./db_conn')  //引入数据库连接类
-var md5 = require('md5')  //引入MD5包
-var date = require("silly-datetime") //引入时间获取模块
-var util = require('util'); //引入工具包
-var path = require('path'); //引入文件路径处理包
-var xlsx = require("node-xlsx");
+const express = require('express'); //导入express框架
+const bodyParser = require('body-parser');  // 引入请求体解析包
+const cookieParser = require('cookie-parser') // 引入cookie解析包
+const connection = require('./db_conn')  //引入数据库连接类
+const md5 = require('md5')  //引入MD5包
+const date = require("silly-datetime") //引入时间获取模块
+const util = require('util'); //引入工具包
+const path = require('path'); //引入文件路径处理包
+const xlsx = require("node-xlsx"); // 引入excel解析生成工具包
 
-var app = express();
+const app = express();
+
+// 创建连接对象
+const connects = new connection();
+
+// post请求体数据解析
+const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 // 设置静态文件夹
 app.use(express.static(path.join(__dirname,'./html/public')))
@@ -16,16 +22,11 @@ app.use(express.static(path.join(__dirname,'./html/public')))
 // cookie解析
 app.use(cookieParser())
 
-// 创建连接对象
-var connects = new connection();
-
-// post请求体数据解析
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
-
-// 访问主页
+// 访问主页 + 获取五级分类数据
 app.get('/home', function (req, resp) {
   // console.log("Cookies: " + util.inspect(req.cookies.session));
   resp.sendFile(__dirname+'/html/index.html')
+  // resp.render("index", {news:[]})
 })
 
 /**
@@ -91,7 +92,7 @@ app.post('/get-witem-info',function(req,resp){
   dates = new Date()
   dates.setDate(dates.getDate()-1)
   execute_sql('select * from witem where op_date=? order by (cur_m_fee+last_m_fee+last2_m_fee) desc limit 0,5',[date.format(dates,'YYYYMMDD'),],call);
-})
+});
 
 // 获取待维护账单科目信息-总记录数
 app.post('/get-witem-info-cnts',function(req,resp){
@@ -202,15 +203,58 @@ app.get('/download-witem',function(req,resp){
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
 });
 
+/**
+ * 获取五级分类
+ ***/
+app.post('/getctginfo',function(req,resp){
+  //获取最大日期
+  var max_date = ''
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    max_date = new Date(res[0]['op_time']).toLocaleString().split(' ')[0].replace(/\//g,'-')
+    call = function(err,res){
+      if(err){
+        console.log(err.message)
+        return
+      }
+      // console.log(res)
+      resp.json(res)
+    }
+    sql = 
+        "select * from ("
+            +"select distinct "
+            +"a.catg_id catg_id1,a.catg_name catg_name1, "
+            +"b.catg_id catg_id2,b.catg_name catg_name2,b.parent_id parent_id1, "
+            +"c.catg_id catg_id3,c.catg_name catg_name3,c.parent_id parent_id2, "
+            +"d.catg_id catg_id4,d.catg_name catg_name4,d.parent_id parent_id3, "
+            +"e.catg_id catg_id5,e.catg_name catg_name5,e.parent_id parent_id4, "
+            +"COALESCE(a.biz_code,b.biz_code,c.biz_code,d.biz_code,e.biz_code)biz_code "
+            +"from (SELECT catg_id,catg_name,biz_code FROM `ent_product_ctg` where parent_id = '0' and op_time=? and op_date=?) a "
+            +"left join (SELECT catg_id,catg_name,parent_id,biz_code FROM `ent_product_ctg` where op_time=? and op_date=? )b on a.catg_id = b.parent_id "
+            +"left join (SELECT catg_id,catg_name,parent_id,biz_code FROM `ent_product_ctg` where op_time=? and op_date=? )c on b.catg_id = c.parent_id "
+            +"left join (SELECT catg_id,catg_name,parent_id,biz_code FROM `ent_product_ctg` where op_time=? and op_date=? )d on c.catg_id = d.parent_id "
+            +"left join (SELECT catg_id,catg_name,parent_id,biz_code FROM `ent_product_ctg` where op_time=? and op_date=? )e on d.catg_id = e.parent_id "
+        +")a where biz_code is not null order by catg_id1,catg_id2,catg_id3,catg_id4,catg_id5,biz_code"
+    dates = new Date()
+    dates.setDate(dates.getDate()-1)
+    execute_sql(sql,[max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),],call)    
+  }
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)  
+  sql = "select max(op_time)op_time from ent_product_ctg where op_date=? "
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
+});
+
 // 服务启动监听端口:7777
 var server = app.listen(7777, function (){
- 
   var host = server.address().address
   var port = server.address().port
- 
   console.log("应用实例，访问地址为 http://%s:%s", host, port)
  
-})
+});
 
 
 

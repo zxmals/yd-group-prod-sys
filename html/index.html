@@ -47,7 +47,7 @@
 			</nav>
 		</div>
 		<div class="row" style="padding-top: 53px;display: true;">
-			<div style="position:fixed;background:linear-gradient(#88c9e7,#1e6374);text-align: center;border-radius: 0.45em;width: 17%;"  id="left-nav">
+			<div style="position:fixed;background:linear-gradient(#88c9e7,#1e6374);text-align: center;border-radius: 0.45em;width: 17%;z-index: 9999;"  id="left-nav">
 				<hr style="border: 0ch;">
 				<strong><font size="4px">全局查询</font></strong>
 				<hr style="border-style: groove;" />
@@ -62,64 +62,66 @@
 				<hr >
 				<div class="row"><strong><font size="4px">分类查询</font></strong></div>
 				<hr style="border-style: groove;" />
-				<div class="row">
-					<select class="selectpicker show-tick"  id="select1" data-width="85%"  data-live-search="true"  data-style="btn-primary"  data-size="5" data-header="产品费项矩阵一级">
-						<option data-divider="true">产品费项矩阵一级</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-					</select>
-				</div>
-
-				<div class="row">
-					<select class="selectpicker show-tick"  id="select2"  data-width="85%"  data-live-search="true"  data-style="btn-success"  data-size="5" data-header="产品费项矩阵二级">
-						<option data-divider="true">产品费项矩阵二级</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-					</select>
-				</div>
-
-				<div class="row">
-					<select class="selectpicker show-tick" id="select3"  data-width="85%"  data-live-search="true"  data-style="btn-primary"  data-size="5" data-header="产品费项矩阵三级">
-						<option data-divider="true">产品费项矩阵三级</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-					</select>
-				</div>
-				
-				<div class="row">
-					<select class="selectpicker show-tick"  id="select4" data-width="85%"  data-live-search="true"  data-style="btn-success"  data-size="5" data-header="产品费项矩阵四级">
-						<option data-divider="true">产品费项矩阵四级</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-					</select>
-				</div>
-				
-				<div class="row">
-					<select class="selectpicker show-tick"  id="select5"  data-width="85%"  data-live-search="true"  data-style="btn-primary"  data-size="5" data-header="产品费项矩阵五级">
-						<option data-divider="true">产品费项矩阵五级</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-						<option>Mustard</option>
-						<option>Ketchup</option>
-						<option>Barbecue</option>
-					</select>
+				<div class="container-fluid">
+					<div class="row">
+						<select class="selectpicker show-tick"  id="select1" data-width="85%"  data-live-search="true"  data-style="btn-primary"  data-size="5" data-header="产品费项矩阵一级">
+							<option data-divider="true">产品费项矩阵一级</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+						</select>
+					</div>
+	
+					<div class="row">
+						<select class="selectpicker show-tick"  id="select2"  data-width="85%"  data-live-search="true"  data-style="btn-success"  data-size="5" data-header="产品费项矩阵二级">
+							<option data-divider="true">产品费项矩阵二级</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+						</select>
+					</div>
+	
+					<div class="row">
+						<select class="selectpicker show-tick" id="select3"  data-width="85%"  data-live-search="true"  data-style="btn-primary"  data-size="5" data-header="产品费项矩阵三级">
+							<option data-divider="true">产品费项矩阵三级</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+						</select>
+					</div>
+					
+					<div class="row">
+						<select class="selectpicker show-tick"  id="select4" data-width="85%"  data-live-search="true"  data-style="btn-success"  data-size="5" data-header="产品费项矩阵四级">
+							<option data-divider="true">产品费项矩阵四级</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+						</select>
+					</div>
+					
+					<div class="row">
+						<select class="selectpicker show-tick"  id="select5"  data-width="85%"  data-live-search="true"  data-style="btn-primary"  data-size="5" data-header="产品费项矩阵五级">
+							<option data-divider="true">产品费项矩阵五级</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+							<option>Mustard</option>
+							<option>Ketchup</option>
+							<option>Barbecue</option>
+						</select>
+					</div>					
 				</div>
 				<hr style="border-style: groove;" />
 				<div class="row"><button type="button" class="btn btn-primary " id="search-ctg" search-type="main">提交分类查询</button></div>
@@ -295,20 +297,5 @@
 		</div>
 	</div>
 </body>
-<script>
-
-// 
-$(document).ready(function(){
-	if(document.cookie.split('=')[0]=='session'&&document.cookie.split('=')[1].substring(0,2)=='ey'){
-		$('#main-nav-h li[act="login"]').css('display','none')
-		$('#main-nav-h li[act="logout"]').css('display','block')
-	}else{
-		$('#main-nav-h li[act="login"]').css('display','block')
-		$('#main-nav-h li[act="logout"]').css('display','none')
-	}
-});
-
-
-</script>
 <script src="js/driver.js"></script>
 </html>
