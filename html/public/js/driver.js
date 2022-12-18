@@ -139,17 +139,16 @@ $(document).ready(function(){
 		update_selector(selid,catg_id,parent_id)
 	});
 
-});
-
-
-// 重置分类选项
-$('#reset-ctg').click(function(){
-	$('.selectpicker option[data-divider=true]').prop('selected',true)
-	$('.selectpicker option').each(function(e){
-		$(this).prop('disabled',false)
-		$(this).removeAttr('style')
+	// 重置分类选项
+	$('#reset-ctg').click(function(){
+		$('.selectpicker option[data-divider=true]').prop('selected',true)
+		$('.selectpicker option').each(function(e){
+			$(this).prop('disabled',false)
+			$(this).removeAttr('style')
+		});
+		$('.selectpicker').selectpicker('refresh')
 	});
-	$('.selectpicker').selectpicker('refresh')
+
 });
 
 // 设置待维护账单科目 html 部分
