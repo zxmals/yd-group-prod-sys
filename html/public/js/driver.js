@@ -238,7 +238,19 @@ $('#main-nav-h li[name!="log"]').click(function(){
 
 	// 导航栏 点击 已维护产品
 	if($(this).attr('name')=='online_prod'){
-		
+		if($('div[data-id="online_prod"] .container-fluid ul').attr('data-search')!='true'){
+			swal('加载中……',{button:false});
+			$.post('/get-online-prod-info-cnts',function(data,status){
+				var cnts =  $('div[data-id="online_prod"] span').eq(0)
+				if(status){
+					cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
+					row_cnts = data[0]['cnts']
+
+				}else{
+					swal('查询错误！',{button:false})
+				}
+			});
+		}
 	}
 
 	// 导航栏 点击 专线专区

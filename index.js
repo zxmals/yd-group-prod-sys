@@ -248,6 +248,18 @@ app.post('/getctginfo',function(req,resp){
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
 });
 
+
+/**
+ * 已维护产品专区
+ * 
+ ***/
+
+// 获取已维护产品总记录数
+app.post('/get-online-prod-info-cnts',urlencodedParser,function(req,resp){
+
+});
+
+
 // 服务启动监听端口:7777
 var server = app.listen(7777, function (){
   var host = server.address().address
