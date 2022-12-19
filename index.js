@@ -256,9 +256,150 @@ app.post('/getctginfo',function(req,resp){
 
 // 获取已维护产品总记录数
 app.post('/get-online-prod-info-cnts',urlencodedParser,function(req,resp){
-
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  sql = 
+  "  select count(1) cnts "+
+  "  from product a "+
+  "  left join ("+
+  "    select * from ent_product_ctg_zx "+
+  "  ) b on a.biz_code=b.biz_code "+
+  "  where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)  
 });
 
+
+// 获取已维护产品信息
+app.post('/get-online-prod-info',function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  sql = 
+  "select a.offer_id,a.offer_name,a.eff_date "+
+  ",b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+  "from product a "+
+  "left join ( "+
+  "  select * from ent_product_ctg_zx "+
+  ") b on a.biz_code=b.biz_code "+
+  "where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+  "order by b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+  " limit 0,5"
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)  
+});
+
+
+// 获取已维护产品信息-关键字查询
+app.post('/get-online-prod-info-ky-cnts',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  key_word = req.body.keyw
+  sql = 
+    " select count(1) cnts "+
+    " from ( "+
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   ,b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " )a  "+
+    " where ( "+
+    "      offer_id like '%"+key_word+"%' "+
+    " or offer_name like '%"+key_word+"%' "+
+    " or catg_name1 like '%"+key_word+"%' "+
+    " or catg_name2 like '%"+key_word+"%' "+
+    " or catg_name3 like '%"+key_word+"%' "+
+    " or catg_name4 like '%"+key_word+"%' "+
+    " or catg_name5 like '%"+key_word+"%' "+
+    " ) "
+    // " order by catg_id1,catg_id2,catg_id3,catg_id4,catg_id5 "+    
+    // " limit 0,5"
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call) 
+});
+
+
+// 获取已维护产品信息-关键字查询
+app.post('/get-online-prod-info-ky',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  key_word = req.body.keyw
+  sql = 
+    " select * "+
+    " from ( "+
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   ,b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " )a  "+
+    " where ( "+
+    "      offer_id like '%"+key_word+"%' "+
+    " or offer_name like '%"+key_word+"%' "+
+    " or catg_name1 like '%"+key_word+"%' "+
+    " or catg_name2 like '%"+key_word+"%' "+
+    " or catg_name3 like '%"+key_word+"%' "+
+    " or catg_name4 like '%"+key_word+"%' "+
+    " or catg_name5 like '%"+key_word+"%' "+
+    " ) "+
+    " order by catg_id1,catg_id2,catg_id3,catg_id4,catg_id5 "+    
+    " limit 0,5"
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)  
+});
+
+
+// 获取已维护产品总记录数-分类查询
+app.post('/get-online-prod-info-ctg-cnts',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  ctg_1 = req.body.ctg1
+  ctg_2 = req.body.ctg2
+  ctg_3 = req.body.ctg3
+  ctg_4 = req.body.ctg4
+  ctg_5 = req.body.ctg5
+  console.log(ctg_1!=null?ctg_1:'ctg1 is null',
+    ctg_2!=null?ctg_2:'ctg2 is null',
+    ctg_3!=null?ctg_3:'ctg3 is null',
+    ctg_4!=null?ctg_4:'ctg4 is null',
+    ctg_5!=null?ctg_5:'ctg5 is null',
+    )  
+});
 
 // 服务启动监听端口:7777
 var server = app.listen(7777, function (){

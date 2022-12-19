@@ -1,5 +1,6 @@
 // 预定义 待维护账单科目全局搜索关键字，防止分页查询时中途插入关键字影响
 item_key_words = ""
+prod_key_words = ""
 
 $(document).ready(function(){
 	if(document.cookie.split('=')[0]=='session'&&document.cookie.split('=')[1].substring(0,2)=='ey'){
@@ -177,6 +178,25 @@ function append_item_html(item_name,item_id,eff_date,op_date,cur_m_fee,last_m_fe
 	return ht
 }
 
+
+// 设置已维护产品 html 部分
+function append_online_prod_html(offer_id,offer_name,eff_date,catg_name1,catg_name2,catg_name3,catg_name4,catg_name5){
+	var ht=""
+	ht = '<ul class="list-group" data-search="true"><li  class="list-group-item list-group-item-danger">'
+	ht += offer_name+'('+offer_id+')'
+	ht += ' <span class="glyphicon glyphicon-book"></span></li><li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>'
+	ht += new Date(Date.parse(eff_date)).toLocaleString().split(' ')[0].replace(/\//g,'-')
+	ht += '</li><li  class="list-group-item list-group-item-warning">归属层级 <span class="glyphicon glyphicon-asterisk"></span>'
+	ht += catg_name1
+	ht += catg_name2!=''&&catg_name2!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name2:''
+	ht += catg_name3!=''&&catg_name3!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name3:''
+	ht += catg_name4!=''&&catg_name4!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name4:''
+	ht += catg_name5!=''&&catg_name5!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name5:''
+	ht += '</li><a href="#" class="list-group-item list-group-item-info" data_prod="'+offer_id+'">下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a></ul>'		
+	return ht
+}
+
+
 // 导航栏其他部分交互
 $('#main-nav-h li[name!="log"]').click(function(){
 	$('#main-nav-h li[name!="log"]').each(function(e){if($(this).hasClass('active')){$(this).removeClass('active');$(this).find('font').attr('color','white')}});
@@ -238,6 +258,7 @@ $('#main-nav-h li[name!="log"]').click(function(){
 
 	// 导航栏 点击 已维护产品
 	if($(this).attr('name')=='online_prod'){
+
 		if($('div[data-id="online_prod"] .container-fluid ul').attr('data-search')!='true'){
 			swal('加载中……',{button:false});
 			$.post('/get-online-prod-info-cnts',function(data,status){
@@ -245,7 +266,22 @@ $('#main-nav-h li[name!="log"]').click(function(){
 				if(status){
 					cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
 					row_cnts = data[0]['cnts']
+					$.post('/get-online-prod-info',function(data,status){
+						if(status){
+							$('div[data-id="online_prod"] .container-fluid ul').remove()
+							data.forEach(function(e){
+								ht = append_online_prod_html(e['offer_id'],e['offer_name'],e['eff_date'],e['catg_name1'],e['catg_name2'],e['catg_name3'],e['catg_name4'],e['catg_name5'])
+								$('div[data-id="online_prod"] .container-fluid').append(ht)
+							});
 
+							$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
+							$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
+							$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')							
+							swal.close()
+						}else{
+							swal('查询错误！',{button:false})
+						}
+					});
 				}else{
 					swal('查询错误！',{button:false})
 				}
@@ -293,10 +329,74 @@ $('#search-item').click(function(){
 
 });
 
+// 模糊搜索管理
+$('#search-all').click(function(){
+	s_type = $(this).attr('search-type')
+	key_words = $(this).parent().prev().val()
+
+	// 已维护产品-关键字查询
+	if(s_type=='online_prod'){		
+		$.post('/get-online-prod-info-ky-cnts',{keyw:key_words},function(data,status){
+			var cnts =  $('div[data-id="online_prod"] span').eq(0)
+			if(status){
+				swal('加载中……',{button:false});
+				cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
+				row_cnts = data[0]['cnts']
+				$.post('/get-online-prod-info-ky',{keyw:key_words},function(data,status){
+					$('div[data-id="online_prod"] .container-fluid ul').remove()
+					data.forEach(function(e){
+						ht = append_online_prod_html(e['offer_id'],e['offer_name'],e['eff_date'],e['catg_name1'],e['catg_name2'],e['catg_name3'],e['catg_name4'],e['catg_name5'])
+						$('div[data-id="online_prod"] .container-fluid').append(ht)
+					});
+					$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
+					$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
+					$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')	
+					swal.close()
+				});
+			}else{
+				swal('查询错误！',{button:false});
+			}
+		});
+	}
+
+	// 专线专区-关键字查询
+	if(s_type=='zb-prod'){}
+
+	// 已下线产品或已退出矩阵产品专区-关键字查询
+	if(s_type=='ald-prod'){}
+});
+
+// 分类查询管理
+$('#search-ctg').click(function(){
+	s_type = $(this).attr('search-type')
+	// 已维护产品-分类查询
+	ctg_m = {}
+	ctg_m['ctg1'] = $('#select1 option:selected').attr('catg_id')
+	ctg_m['ctg2'] = $('#select2 option:selected').attr('catg_id')
+	ctg_m['ctg3'] = $('#select3 option:selected').attr('catg_id')
+	ctg_m['ctg4'] = $('#select4 option:selected').attr('catg_id')
+	ctg_m['ctg5'] = $('#select5 option:selected').attr('catg_id')
+	if(s_type=='online_prod'){
+		$.post('/get-online-prod-info-ctg-cnts',ctg_m,function(data,status){
+			if(status){
+
+			}else{
+				swal('查询错误！',{button:false});
+			}
+		});
+	}
+
+	// 专线专区-分类查询
+	if(s_type=='zb-prod'){}
+
+	// 已下线产品或已退出矩阵产品专区-分类查询
+	if(s_type=='ald-prod'){}	
+});
+
 // 下载管理
 $('div[data-ts="show-contents"] span').click(function(){
 	if($(this).parent().attr('data-id')=='wait-item'&&$(this).find('font').text()=='导出下载'){
-		console.log('--------------------witem-download---------------------------')
+		// console.log('--------------------witem-download---------------------------')
 		window.open('/download-witem')
 	}
 });
@@ -359,6 +459,10 @@ $('a[hre-type="turn-page"]').click(function(){
 		}
 	}
 
+	// 已维护产品-分页管理
+	if(page_type=="online_prod"){
+
+	}
 
 });	
 
