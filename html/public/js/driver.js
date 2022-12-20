@@ -1,6 +1,9 @@
 // 预定义 待维护账单科目全局搜索关键字，防止分页查询时中途插入关键字影响
 item_key_words = ""
+// 预定义 以维护产品模糊搜索关键字，防止分页查询时中途插入关键字影响
 prod_key_words = ""
+// 预定义 以维护产品分类搜索筛选信息，防止分页查询时中途插入关键字影响
+ctg_m = null
 
 $(document).ready(function(){
 	if(document.cookie.split('=')[0]=='session'&&document.cookie.split('=')[1].substring(0,2)=='ey'){
@@ -334,11 +337,16 @@ $('#search-all').click(function(){
 	s_type = $(this).attr('search-type')
 	key_words = $(this).parent().prev().val()
 
+	if(s_type=='main'){swal('请选择专区进行查询',{button:false})}
+		
 	// 已维护产品-关键字查询
 	if(s_type=='online_prod'){		
 		$.post('/get-online-prod-info-ky-cnts',{keyw:key_words},function(data,status){
 			var cnts =  $('div[data-id="online_prod"] span').eq(0)
-			if(status){
+			if(status){			
+				prod_key_words = key_words
+				ctg_m = null
+				$('#reset-ctg').click()
 				swal('加载中……',{button:false});
 				cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
 				row_cnts = data[0]['cnts']
@@ -376,10 +384,31 @@ $('#search-ctg').click(function(){
 	ctg_m['ctg3'] = $('#select3 option:selected').attr('catg_id')
 	ctg_m['ctg4'] = $('#select4 option:selected').attr('catg_id')
 	ctg_m['ctg5'] = $('#select5 option:selected').attr('catg_id')
+	if(s_type=='main'){swal('请选择专区进行查询',{button:false})}
 	if(s_type=='online_prod'){
 		$.post('/get-online-prod-info-ctg-cnts',ctg_m,function(data,status){
+			var cnts =  $('div[data-id="online_prod"] span').eq(0)
 			if(status){
-
+				$('#search-all').parent().prev().val('')
+				prod_key_words = ""				
+				swal('加载中……',{button:false});
+				cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
+				row_cnts = data[0]['cnts']
+				$.post('/get-online-prod-info-ctg',ctg_m,function(data,status){
+					if(status){
+						$('div[data-id="online_prod"] .container-fluid ul').remove()
+						data.forEach(function(e){
+							ht = append_online_prod_html(e['offer_id'],e['offer_name'],e['eff_date'],e['catg_name1'],e['catg_name2'],e['catg_name3'],e['catg_name4'],e['catg_name5'])
+							$('div[data-id="online_prod"] .container-fluid').append(ht)
+						});
+						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
+						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
+						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')	
+						swal.close()
+					}else{
+						swal('查询错误！',{button:false});
+					}
+				});
 			}else{
 				swal('查询错误！',{button:false});
 			}
@@ -461,9 +490,71 @@ $('a[hre-type="turn-page"]').click(function(){
 
 	// 已维护产品-分页管理
 	if(page_type=="online_prod"){
-
+		pere_sumpages = $(this).parent().prev().children().text().split('\/')[1]
+		next_sumpages = $(this).parent().next().children().text().split('\/')[1]
+		sum_pages = pere_sumpages!=null?parseInt(pere_sumpages):parseInt(next_sumpages)
+		cur_page = parseInt($(this).attr('cur-page'))
+		post_data = {keyw:prod_key_words,sum_pages:sum_pages,cur_page:cur_page}
+		Object.assign(post_data,ctg_m)
+		if($(this).attr('act')=='pere'){
+			// console.log('----------------------------上一页--------------------------------')
+			if($(this).attr('cur-page')>1&&cur_page<=sum_pages){
+				swal('加载中……',{button:false});
+				$.post('/pere-online-prod-page',post_data,function(data,status){
+					if(status){
+						$('div[data-id="online_prod"] .container-fluid ul').remove()
+						data.forEach(function(e){
+							ht = append_online_prod_html(e['offer_id'],e['offer_name'],e['eff_date'],e['catg_name1'],e['catg_name2'],e['catg_name3'],e['catg_name4'],e['catg_name5'])
+							$('div[data-id="online_prod"] .container-fluid').append(ht)
+						});
+						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text((parseInt(cur_page)-1)+'/'+sum_pages).end()
+						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page',(parseInt(cur_page)-1))
+						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page',(parseInt(cur_page)-1))	
+						swal.close()						
+					}else{
+						swal('查询错误！',{button:false});
+					}
+				});
+			}
+		}else if($(this).attr('act')=='next'){
+			// console.log('----------------------------下一页--------------------------------')
+			if(cur_page<sum_pages){
+				swal('加载中……',{button:false});
+				$.post('/next-online-prod-page',post_data,function(data,status){
+					if(status){
+						$('div[data-id="online_prod"] .container-fluid ul').remove()
+						data.forEach(function(e){
+							ht = append_online_prod_html(e['offer_id'],e['offer_name'],e['eff_date'],e['catg_name1'],e['catg_name2'],e['catg_name3'],e['catg_name4'],e['catg_name5'])
+							$('div[data-id="online_prod"] .container-fluid').append(ht)
+						});
+						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text((parseInt(cur_page)+1)+'/'+sum_pages).end()
+						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page',(parseInt(cur_page)+1))
+						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page',(parseInt(cur_page)+1))	
+						swal.close()						
+					}else{
+						swal('查询错误！',{button:false});
+					}
+				});
+				swal.close();
+			}
+		}		
 	}
 
+	// 专线产品专区-分页管理
+	if(page_type=="zb-prod"){
+		sum_pages = parseInt($(this).parent().prev().children().text().split('\/')[1])
+		cur_page = parseInt($(this).attr('cur-page'))
+		post_data = {keyw:item_key_words,sum_pages:sum_pages,cur_page:cur_page}
+		console.log(post_data)
+	}
+
+	// 已下线或已退出矩阵产品专区-分页管理
+	if(page_type=="ald-prod"){
+		sum_pages = parseInt($(this).parent().prev().children().text().split('\/')[1])
+		cur_page = parseInt($(this).attr('cur-page'))
+		post_data = {keyw:prod_key_words,sum_pages:sum_pages,cur_page:cur_page}
+		console.log(post_data)
+	}	
 });	
 
 // 首页按钮
