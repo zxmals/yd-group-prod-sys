@@ -562,6 +562,22 @@ app.post('/pere-online-prod-page',urlencodedParser,function(req,resp){
 });
 
 
+// 根据产品ID获取下属账单科目明细
+app.post('/get-item-info-by-offerid',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  offer_id = req.body.offer_id
+  sql = " select  (@rowNum :=  @rowNum + 1)  as rn,a.* from product_item a,(SELECT @rowNum:=0) as rownum where  a.op_date = ? and a.offer_id = ? "
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)  
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),offer_id,],call)  
+});
+
 // 服务启动监听端口:7777
 var server = app.listen(7777, function (){
   var host = server.address().address

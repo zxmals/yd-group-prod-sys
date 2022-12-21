@@ -155,6 +155,35 @@ $(document).ready(function(){
 
 });
 
+// 查看从属账单科目
+reload_item_info_click=function(){
+	$('a[data_prod]').click(function(){
+		offer_id = $(this).attr('data_prod')
+		offer_info = $(this).siblings().eq(0).text()
+		$('#item-info .modal-header h4').text(offer_info+'下属账单科目')
+		swal('加载中……',{button:false});
+		$.post('/get-item-info-by-offerid',{offer_id:offer_id},function(data,status){			
+			if(status){
+				$('#item-info .modal-body tbody tr').remove()
+				data.forEach(function(e){
+					ht = '<tr class="info">'
+					ht += '<td class="col-md-1">'+e['rn']+'</td>'									
+					ht += e['item_name'].length>20 ? '<td class="col-md-8" data-toggle="popover"  title="科目名称"  data-content="'+e[item_name]+'">'+e['item_name'].substr(0,20)+'</td>':'<td class="col-md-8">'+e['item_name']+'</td>'
+					ht += '<td class="col-md-3">'+e['item_id']+'</td>'
+					$('#item-info .modal-body tbody').append(ht)
+				});
+				swal.close()
+			}else{
+				swal('查询错误！',{button:false})
+			}
+		});
+		$('#item-info').modal('show')
+	});
+	$('#item-info table td').click(function(){
+		$(this).popover('show')
+	});
+}
+
 // 设置待维护账单科目 html 部分
 function append_item_html(item_name,item_id,eff_date,op_date,cur_m_fee,last_m_fee,last2_m_fee){
 	var ht=""
@@ -195,7 +224,7 @@ function append_online_prod_html(offer_id,offer_name,eff_date,catg_name1,catg_na
 	ht += catg_name3!=''&&catg_name3!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name3:''
 	ht += catg_name4!=''&&catg_name4!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name4:''
 	ht += catg_name5!=''&&catg_name5!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name5:''
-	ht += '</li><a href="#" class="list-group-item list-group-item-info" data_prod="'+offer_id+'">下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a></ul>'		
+	ht += '</li><a href="#" class="list-group-item list-group-item-info" data_prod="'+offer_id+'" >下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a></ul>'		
 	return ht
 }
 
@@ -279,7 +308,8 @@ $('#main-nav-h li[name!="log"]').click(function(){
 
 							$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 							$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
-							$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')							
+							$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')
+							reload_item_info_click()
 							swal.close()
 						}else{
 							swal('查询错误！',{button:false})
@@ -338,7 +368,7 @@ $('#search-all').click(function(){
 	key_words = $(this).parent().prev().val()
 
 	if(s_type=='main'){swal('请选择专区进行查询',{button:false})}
-		
+
 	// 已维护产品-关键字查询
 	if(s_type=='online_prod'){		
 		$.post('/get-online-prod-info-ky-cnts',{keyw:key_words},function(data,status){
@@ -358,7 +388,8 @@ $('#search-all').click(function(){
 					});
 					$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 					$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
-					$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')	
+					$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')
+					reload_item_info_click()
 					swal.close()
 				});
 			}else{
@@ -403,7 +434,8 @@ $('#search-ctg').click(function(){
 						});
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
-						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')	
+						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')
+						reload_item_info_click()
 						swal.close()
 					}else{
 						swal('查询错误！',{button:false});
@@ -454,7 +486,7 @@ $('a[hre-type="turn-page"]').click(function(){
 						});
 						$('a[hre-type][data-stypes="witem"]').eq(0).parent().next().children().text((parseInt(cur_page)-1)+'/'+sum_pages).end()
 						$('a[hre-type][data-stypes="witem"]').eq(0).attr('cur-page',(parseInt(cur_page)-1))
-						$('a[hre-type][data-stypes="witem"]').eq(1).attr('cur-page',(parseInt(cur_page)-1))						
+						$('a[hre-type][data-stypes="witem"]').eq(1).attr('cur-page',(parseInt(cur_page)-1))				
 						swal.close();
 					}else{
 						swal('查询错误！',{button:false});
@@ -510,6 +542,7 @@ $('a[hre-type="turn-page"]').click(function(){
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text((parseInt(cur_page)-1)+'/'+sum_pages).end()
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page',(parseInt(cur_page)-1))
 						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page',(parseInt(cur_page)-1))	
+						reload_item_info_click()
 						swal.close()						
 					}else{
 						swal('查询错误！',{button:false});
@@ -530,6 +563,7 @@ $('a[hre-type="turn-page"]').click(function(){
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text((parseInt(cur_page)+1)+'/'+sum_pages).end()
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page',(parseInt(cur_page)+1))
 						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page',(parseInt(cur_page)+1))	
+						reload_item_info_click()
 						swal.close()						
 					}else{
 						swal('查询错误！',{button:false});
