@@ -572,7 +572,7 @@ app.post('/get-item-info-by-offerid',urlencodedParser,function(req,resp){
     resp.json(res)
   }
   offer_id = req.body.offer_id
-  sql = " select  (@rowNum :=  @rowNum + 1)  as rn,a.* from product_item a,(SELECT @rowNum:=0) as rownum where  a.op_date = ? and a.offer_id = ? "
+  sql = " select  (@rowNum :=  @rowNum + 1)  as rn,a.* from product_item a,(SELECT @rowNum:=0) as rownum where  a.op_date = ? and a.offer_id = ? and item_id != '' "
   dates = new Date()
   dates.setDate(dates.getDate()-1)  
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),offer_id,],call)  

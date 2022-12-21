@@ -155,7 +155,7 @@ $(document).ready(function(){
 
 });
 
-// 查看从属账单科目
+// 查看从属账单科目信息-需重载函数
 reload_item_info_click=function(){
 	$('a[data_prod]').click(function(){
 		offer_id = $(this).attr('data_prod')
