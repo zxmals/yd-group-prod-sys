@@ -17,17 +17,17 @@ const connects = new connection();
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 // 设置静态文件夹
-app.use(express.static(path.join(__dirname,'./html/public')))
+app.use('/grp',express.static(path.join(__dirname,'./html/public')))
 
 // cookie解析
 app.use(cookieParser())
 
 // 访问主页 + 获取五级分类数据
-app.get('/home', function (req, resp) {
+app.get('/grp/home', function (req, resp) {
   // console.log("Cookies: " + util.inspect(req.cookies.session));
   resp.sendFile(__dirname+'/html/index.html')
   // resp.render("index", {news:[]})
-})
+});
 
 /**
  *  封装数据库SQL查询
