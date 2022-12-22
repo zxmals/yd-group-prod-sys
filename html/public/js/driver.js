@@ -155,6 +155,13 @@ $(document).ready(function(){
 
 });
 
+// 查看从属账单科目-科目名称-需重载函数
+reload_item_td_info=function(){
+	$('#item-info table td').click(function(){
+		$(this).popover('show')
+	});
+}
+
 // 查看从属账单科目信息-需重载函数
 reload_item_info_click=function(){
 	$('a[data_prod]').click(function(){
@@ -168,10 +175,11 @@ reload_item_info_click=function(){
 				data.forEach(function(e){
 					ht = '<tr class="info">'
 					ht += '<td class="col-md-1">'+e['rn']+'</td>'									
-					ht += e['item_name'].length>20 ? '<td class="col-md-8" data-toggle="popover"  title="科目名称"  data-content="'+e[item_name]+'">'+e['item_name'].substr(0,20)+'</td>':'<td class="col-md-8">'+e['item_name']+'</td>'
+					ht += e['item_name'].length>20 ? '<td class="col-md-8" data-toggle="popover"  title="科目名称"  data-content="'+e['item_name']+'"><a href="#">'+e['item_name'].substr(0,17)+'...</a></td>':'<td class="col-md-8">'+e['item_name']+'</td>'
 					ht += '<td class="col-md-3">'+e['item_id']+'</td>'
 					$('#item-info .modal-body tbody').append(ht)
 				});
+				reload_item_td_info()
 				swal.close()
 			}else{
 				swal('查询错误！',{button:false})
@@ -179,9 +187,7 @@ reload_item_info_click=function(){
 		});
 		$('#item-info').modal('show')
 	});
-	$('#item-info table td').click(function(){
-		$(this).popover('show')
-	});
+
 }
 
 // 设置待维护账单科目 html 部分
