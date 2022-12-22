@@ -160,6 +160,10 @@ reload_item_td_info=function(){
 	$('#item-info table td').click(function(){
 		$(this).popover('show')
 	});
+	$('#item-info .modal-footer button[act="export-data"]').click(function(){
+		// console.log('--------------------export-item-info------------------------------')
+		window.open('/downlowd-item-info-by-offerid?offer_info='+$(this).attr('offer_info')+'&offer_id='+$(this).attr('offer_id'))
+	});
 }
 
 // 查看从属账单科目信息-需重载函数
@@ -179,7 +183,9 @@ reload_item_info_click=function(){
 					ht += '<td class="col-md-3">'+e['item_id']+'</td>'
 					$('#item-info .modal-body tbody').append(ht)
 				});
-				reload_item_td_info()
+				$('#item-info .modal-footer button[act="export-data"]').attr('offer_info',offer_info)
+				$('#item-info .modal-footer button[act="export-data"]').attr('offer_id',offer_id)
+				reload_item_td_info()			
 				swal.close()
 			}else{
 				swal('查询错误！',{button:false})
@@ -466,6 +472,10 @@ $('div[data-ts="show-contents"] span').click(function(){
 		// console.log('--------------------witem-download---------------------------')
 		window.open('/download-witem')
 	}
+	if($(this).parent().attr('data-id')=='online_prod'&&$(this).find('font').text()=='导出下载'){
+		// console.log('--------------------online-prod-download---------------------------')
+		window.open('/downlowd-online-prod')
+	}	
 });
 
 // 分页管理

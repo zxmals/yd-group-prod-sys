@@ -199,7 +199,7 @@ app.get('/download-witem',function(req,resp){
   }
   sql = "select * from witem where op_date=? order by (cur_m_fee+last_m_fee+last2_m_fee) desc"
   dates = new Date()
-  dates.setDate(dates.getDate()-1)  
+  dates.setDate(dates.getDate()-1)
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
 });
 
@@ -576,6 +576,64 @@ app.post('/get-item-info-by-offerid',urlencodedParser,function(req,resp){
   dates = new Date()
   dates.setDate(dates.getDate()-1)  
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),offer_id,],call)  
+});
+
+
+// 导出下载-账单科目明细-by-offer_id
+app.get('/downlowd-item-info-by-offerid',function(req,resp){
+  // console.log(req.query.offer_info,'------------offer_id')
+  var offer_info = req.query.offer_info
+  var offer_id = req.query.offer_id
+  filename = encodeURIComponent(offer_info+'.xlsx')
+  resp.set({'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename='+filename})
+  data = []
+  data.push(['账单科目名称','账单科目编码'])  
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    res.forEach(function(e){
+      data.push([e['item_name'],e['item_id']]);
+    });
+    resp.send(xlsx.build([{'name':'sheet1',data:data}]))
+  }
+  sql = "SELECT item_name,item_id FROM `product_item` where offer_id = ? and op_date = ?"
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)  
+  execute_sql(sql,[offer_id,date.format(dates,'YYYY-MM-DD'),],call)
+});
+
+
+// 导出下载-已维护产品专区
+app.get('/downlowd-online-prod',function(req,resp){
+
+  filename = encodeURIComponent('已维护产品明细.xlsx')
+  resp.set({'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename='+filename})
+  data = []
+  data.push(['产品编码','产品名称','上线日期','一级分类','二级分类','三级分类','四级分类','五级分类','四位科目'])  
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    res.forEach(function(e){
+      data.push([e['offer_id'],e['offer_name'],e['eff_date'],e['catg_name1'],e['catg_name2'],e['catg_name3'],e['catg_name4'],e['catg_name5'],e['biz_code']]);
+    });
+    resp.send(xlsx.build([{'name':'sheet1',data:data}]))
+  }
+  sql = 
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    "   order by b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
 });
 
 // 服务启动监听端口:7777
