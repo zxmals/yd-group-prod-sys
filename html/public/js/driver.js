@@ -265,7 +265,13 @@ function append_zb_prod_html(offer_id,offer_name,eff_date,catg_name1,catg_name2,
 	ht += catg_name3!=''&&catg_name3!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name3:''
 	ht += catg_name4!=''&&catg_name4!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name4:''
 	ht += catg_name5!=''&&catg_name5!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name5:''
-	ht += '</li><a href="#" class="list-group-item list-group-item-info" data_prod="'+offer_id+'" >下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a></ul>'		
+	ht += '</li><li class="list-group-item list-group-item-info"><a href="#" data_prod="'+offer_id+'" >下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#">产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#">产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#">管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#">操作流程 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#">近期维护 <span class="glyphicon glyphicon-new-window"></span></a>'
+	ht += '</li></ul>'
 	return ht
 }
 
@@ -274,7 +280,7 @@ $('#main-nav-h li[name!="log"]').click(function(){
 	$('#main-nav-h li[name!="log"]').each(function(e){if($(this).hasClass('active')){$(this).removeClass('active');$(this).find('font').attr('color','white')}});
 	$(this).addClass("active")
 	$(this).find("font").removeAttr("color")
-	$('#reset-ctg').click()
+	$('#reset-ctg').click()                        // 刷新分类管理
 	$('#search-all').attr('search-type',$(this).attr('name'))
 	$('#search-ctg').attr('search-type',$(this).attr('name'))
 	cur_name = $(this).attr('name')
