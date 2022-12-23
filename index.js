@@ -7,6 +7,8 @@ const date = require("silly-datetime") //引入时间获取模块
 const util = require('util'); //引入工具包
 const path = require('path'); //引入文件路径处理包
 const xlsx = require("node-xlsx"); // 引入excel解析生成工具包
+var fs = require("fs"); // 引入文件读写模块
+var str_random = require("string-random"); // 引入随机生成字符串工具包
 
 const app = express();
 
@@ -28,6 +30,26 @@ app.get('/grp/home', function (req, resp) {
   resp.sendFile(__dirname+'/html/index.html')
   // resp.render("index", {news:[]})
 });
+
+
+// admin login
+app.get('/grp/admin', function (req, resp) {
+  // console.log("Cookies: " + util.inspect(req.cookies.session),req.cookies.session);  
+  if(req.cookies.session!=null){
+      sess = Buffer.from(util.inspect(req.cookies.session),'base64')
+      sess = JSON.parse(sess)
+      var key = fs.readFileSync('./session/'+sess['uname']+'.txt');
+      if(key==sess['key']){
+        resp.sendFile(__dirname+'/html/admin.html')
+      }else{
+        resp.sendFile(__dirname+'/html/index.html')
+      }
+  }else{
+    resp.sendFile(__dirname+'/html/index.html')
+  }
+  // resp.render("index", {news:[]})
+});
+
 
 /**
  *  封装数据库SQL查询
@@ -52,9 +74,14 @@ app.post('/login',urlencodedParser,function(req,resp){
       return;
     }
     if(res.length>0){
+      var key = str_random(33)
+      key = md5(key)
+      var writerStream = fs.createWriteStream('./session/'+res[0].username+'.txt');
+      writerStream.write(key,'UTF8');
       respd = {
         'uname':res[0].username,
-        'login':true
+        'login':true,
+        'key':key
       }
       respd = Buffer.from(JSON.stringify(respd));
       respd = respd.toString('base64');
@@ -231,13 +258,14 @@ app.post('/getctginfo',function(req,resp){
             +"c.catg_id catg_id3,c.catg_name catg_name3,c.parent_id parent_id2, "
             +"d.catg_id catg_id4,d.catg_name catg_name4,d.parent_id parent_id3, "
             +"e.catg_id catg_id5,e.catg_name catg_name5,e.parent_id parent_id4, "
-            +"COALESCE(a.biz_code,b.biz_code,c.biz_code,d.biz_code,e.biz_code)biz_code "
+            +"COALESCE(a.biz_code,b.biz_code,c.biz_code,d.biz_code,e.biz_code)biz_code, "
+            +"case when (c.catg_name like '%专线%' or d.catg_name like '%专线%' or e.catg_name like '%专线%') then 1 else 0 end if_zp_prod "
             +"from (SELECT catg_id,catg_name,biz_code FROM `ent_product_ctg` where parent_id = '0' and op_time=? and op_date=?) a "
             +"left join (SELECT catg_id,catg_name,parent_id,biz_code FROM `ent_product_ctg` where op_time=? and op_date=? )b on a.catg_id = b.parent_id "
             +"left join (SELECT catg_id,catg_name,parent_id,biz_code FROM `ent_product_ctg` where op_time=? and op_date=? )c on b.catg_id = c.parent_id "
             +"left join (SELECT catg_id,catg_name,parent_id,biz_code FROM `ent_product_ctg` where op_time=? and op_date=? )d on c.catg_id = d.parent_id "
             +"left join (SELECT catg_id,catg_name,parent_id,biz_code FROM `ent_product_ctg` where op_time=? and op_date=? )e on d.catg_id = e.parent_id "
-        +")a where biz_code is not null order by catg_id1,catg_id2,catg_id3,catg_id4,catg_id5,biz_code"
+        +")a where biz_code is not null order by catg_id1  asc, if_zp_prod desc,catg_id2  asc, if_zp_prod desc,catg_id3  asc, if_zp_prod desc,catg_id4  asc, if_zp_prod desc,catg_id5  asc, if_zp_prod desc,biz_code asc "
     dates = new Date()
     dates.setDate(dates.getDate()-1)
     execute_sql(sql,[max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),max_date,date.format(dates,'YYYY-MM-DD'),],call)    
@@ -607,7 +635,6 @@ app.get('/downlowd-item-info-by-offerid',function(req,resp){
 
 // 导出下载-已维护产品专区
 app.get('/downlowd-online-prod',function(req,resp){
-
   filename = encodeURIComponent('已维护产品明细.xlsx')
   resp.set({'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename='+filename})
   data = []
@@ -634,6 +661,61 @@ app.get('/downlowd-online-prod',function(req,resp){
   dates = new Date()
   dates.setDate(dates.getDate()-1)
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
+});
+
+
+
+/**
+ * 专线产品专区
+ * 
+ ***/
+
+// 获取已维护产品总记录数
+app.post('/get-zb-prod-info-cnts',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  sql = 
+  "  select count(1) cnts "+
+  "  from product a "+
+  "  left join ("+
+  "    select * from ent_product_ctg_zx "+
+  "  ) b on a.biz_code=b.biz_code "+
+  "  where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%')  "
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)  
+});
+
+
+// 获取已维护产品信息
+app.post('/get-zb-prod-info',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  sql = 
+  "select a.offer_id,a.offer_name,a.eff_date "+
+  ",b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+  "from product a "+
+  "left join ( "+
+  "  select * from ent_product_ctg_zx "+
+  ") b on a.biz_code=b.biz_code "+
+  "where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+  " and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%')  "+
+  "order by offer_id "+
+  " limit 0,5"
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)  
 });
 
 // 服务启动监听端口:7777

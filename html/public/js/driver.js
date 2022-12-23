@@ -27,13 +27,13 @@ $(document).ready(function(){
 			ctg2 = '<option data-divider="true">产品费项矩阵二级</option>'
 			ctg3 = '<option data-divider="true">产品费项矩阵三级</option>'
 			ctg4 = '<option data-divider="true">产品费项矩阵四级</option>'
-			ctg5 = '<option data-divider="true">产品费项矩阵五级</option>'			
+			ctg5 = '<option data-divider="true">产品费项矩阵五级</option>'
 			data.forEach(function(e){
-				ctg1 += ctg1.indexOf(e['catg_id1'])<0 && e['catg_id2']!=null?'<option catg_id="'+e['catg_id1']+'">'+e['catg_name1']+'</option>':""
-				ctg2 += ctg2.indexOf(e['catg_id2'])<0 && e['catg_id2']!=null?'<option catg_id="'+e['catg_id2']+'" parent_id="'+e['parent_id1']+'">'+e['catg_name2']+'</option>':""
-				ctg3 += ctg3.indexOf(e['catg_id3'])<0 && e['catg_id3']!=null?'<option catg_id="'+e['catg_id3']+'" parent_id="'+e['parent_id2']+'">'+e['catg_name3']+'</option>':""
-				ctg4 += ctg4.indexOf(e['catg_id4'])<0 && e['catg_id4']!=null?'<option catg_id="'+e['catg_id4']+'" parent_id="'+e['parent_id3']+'">'+e['catg_name4']+'</option>':""
-				ctg5 += ctg5.indexOf(e['catg_id5'])<0 && e['catg_id5']!=null?'<option catg_id="'+e['catg_id5']+'" biz_code='+e['biz_code']+' parent_id="'+e['parent_id4']+'">'+e['catg_name5']+'</option>':""
+				ctg1 += ctg1.indexOf(e['catg_id1'])<0 && e['catg_id2']!=null?'<option catg_id="'+e['catg_id1']+'"  if_zp_prod="'+e['if_zp_prod']+'"  >'+e['catg_name1']+'</option>':""
+				ctg2 += ctg2.indexOf(e['catg_id2'])<0 && e['catg_id2']!=null?'<option catg_id="'+e['catg_id2']+'"  if_zp_prod="'+e['if_zp_prod']+'"   parent_id="'+e['parent_id1']+'">'+e['catg_name2']+'</option>':""
+				ctg3 += ctg3.indexOf(e['catg_id3'])<0 && e['catg_id3']!=null?'<option catg_id="'+e['catg_id3']+'"  if_zp_prod="'+e['if_zp_prod']+'"   parent_id="'+e['parent_id2']+'">'+e['catg_name3']+'</option>':""
+				ctg4 += ctg4.indexOf(e['catg_id4'])<0 && e['catg_id4']!=null?'<option catg_id="'+e['catg_id4']+'"  if_zp_prod="'+e['if_zp_prod']+'"   parent_id="'+e['parent_id3']+'">'+e['catg_name4']+'</option>':""
+				ctg5 += ctg5.indexOf(e['catg_id5'])<0 && e['catg_id5']!=null?'<option catg_id="'+e['catg_id5']+'"  if_zp_prod="'+e['if_zp_prod']+'"   biz_code='+e['biz_code']+' parent_id="'+e['parent_id4']+'">'+e['catg_name5']+'</option>':""
 			});
 			$('#select1').append(ctg1)
 			$('#select2').append(ctg2)
@@ -133,6 +133,10 @@ $(document).ready(function(){
 			pid = up_ch_select(2,pid)
 			pid = up_ch_select(1,pid)						
 		}
+		// 专线专区单独设置
+		if($('#main-nav-h li[name="zb-prod"]').hasClass('active')){
+			$('.selectpicker option[if_zp_prod="0"]').css('display','none')
+		}		
 		$('.selectpicker').selectpicker('refresh')
 	}
 	// select-change-events  分类选择器监听
@@ -150,6 +154,10 @@ $(document).ready(function(){
 			$(this).prop('disabled',false)
 			$(this).removeAttr('style')
 		});
+		// 专线专区单独设置
+		if($('#main-nav-h li[name="zb-prod"]').hasClass('active')){
+			$('.selectpicker option[if_zp_prod="0"]').css('display','none')
+		}		
 		$('.selectpicker').selectpicker('refresh')
 	});
 
@@ -160,11 +168,14 @@ reload_item_td_info=function(){
 	$('#item-info table td').click(function(){
 		$(this).popover('show')
 	});
-	$('#item-info .modal-footer button[act="export-data"]').click(function(){
-		// console.log('--------------------export-item-info------------------------------')
-		window.open('/downlowd-item-info-by-offerid?offer_info='+$(this).attr('offer_info')+'&offer_id='+$(this).attr('offer_id'))
-	});
+
+
 }
+
+$('#item-info .modal-footer button[act="export-data"]').click(function(){
+	// console.log('--------------------export-item-info------------------------------')
+	window.open('/downlowd-item-info-by-offerid?offer_info='+$(this).attr('offer_info')+'&offer_id='+$(this).attr('offer_id'))
+});
 
 // 查看从属账单科目信息-需重载函数
 reload_item_info_click=function(){
@@ -185,7 +196,7 @@ reload_item_info_click=function(){
 				});
 				$('#item-info .modal-footer button[act="export-data"]').attr('offer_info',offer_info)
 				$('#item-info .modal-footer button[act="export-data"]').attr('offer_id',offer_id)
-				reload_item_td_info()			
+				reload_item_td_info()
 				swal.close()
 			}else{
 				swal('查询错误！',{button:false})
@@ -241,11 +252,29 @@ function append_online_prod_html(offer_id,offer_name,eff_date,catg_name1,catg_na
 }
 
 
+// 设置专线专区 html 部分
+function append_zb_prod_html(offer_id,offer_name,eff_date,catg_name1,catg_name2,catg_name3,catg_name4,catg_name5){
+	var ht=""
+	ht = '<ul class="list-group" data-search="true"><li  class="list-group-item list-group-item-danger">'
+	ht += offer_name+'('+offer_id+')'
+	ht += ' <span class="glyphicon glyphicon-book"></span></li><li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>'
+	ht += new Date(Date.parse(eff_date)).toLocaleString().split(' ')[0].replace(/\//g,'-')
+	ht += '</li><li  class="list-group-item list-group-item-warning">归属层级 <span class="glyphicon glyphicon-asterisk"></span>'
+	ht += catg_name1
+	ht += catg_name2!=''&&catg_name2!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name2:''
+	ht += catg_name3!=''&&catg_name3!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name3:''
+	ht += catg_name4!=''&&catg_name4!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name4:''
+	ht += catg_name5!=''&&catg_name5!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name5:''
+	ht += '</li><a href="#" class="list-group-item list-group-item-info" data_prod="'+offer_id+'" >下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a></ul>'		
+	return ht
+}
+
 // 导航栏其他部分交互
 $('#main-nav-h li[name!="log"]').click(function(){
 	$('#main-nav-h li[name!="log"]').each(function(e){if($(this).hasClass('active')){$(this).removeClass('active');$(this).find('font').attr('color','white')}});
 	$(this).addClass("active")
 	$(this).find("font").removeAttr("color")
+	$('#reset-ctg').click()
 	$('#search-all').attr('search-type',$(this).attr('name'))
 	$('#search-ctg').attr('search-type',$(this).attr('name'))
 	cur_name = $(this).attr('name')
@@ -320,8 +349,9 @@ $('#main-nav-h li[name!="log"]').click(function(){
 
 							$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 							$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
-							$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')
+							$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')							
 							reload_item_info_click()
+							// reload_item_info_click = null
 							swal.close()
 						}else{
 							swal('查询错误！',{button:false})
@@ -335,7 +365,37 @@ $('#main-nav-h li[name!="log"]').click(function(){
 	}
 
 	// 导航栏 点击 专线专区
-	if($(this).attr('name')=='zb-prod'){}
+	if($(this).attr('name')=='zb-prod'){
+		if($('div[data-id="zb-prod"] .container-fluid ul').attr('data-search')!='true'){
+			swal('加载中……',{button:false});
+			$.post('/get-zb-prod-info-cnts',function(data,status){
+				var cnts =  $('div[data-id="zb-prod"] span').eq(0)
+				if(status){
+					cnts.text('共为您搜索到'+data[0]['cnts']+'条记录')
+					row_cnts = data[0]['cnts']
+					$.post('/get-zb-prod-info',function(data,status){
+						if(status){
+							$('div[data-id="zb-prod"] .container-fluid ul').remove()
+							data.forEach(function(e){
+								ht = append_zb_prod_html(e['offer_id'],e['offer_name'],e['eff_date'],e['catg_name1'],e['catg_name2'],e['catg_name3'],e['catg_name4'],e['catg_name5'])
+								$('div[data-id="zb-prod"] .container-fluid').append(ht)
+							});
+							$('a[hre-type][data-stypes="zb-prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
+							$('a[hre-type][data-stypes="zb-prod"]').eq(0).attr('cur-page','1')
+							$('a[hre-type][data-stypes="zb-prod"]').eq(1).attr('cur-page','1')							
+							reload_item_info_click()
+							swal.close()							
+						}else{
+							swal('查询错误！',{button:false})
+						}
+					});
+				}else{
+					swal('查询错误！',{button:false})
+				}
+			});
+
+		}
+	}
 
 	// 导航栏 点击 已下线或已退出矩阵产品专区
 	if($(this).attr('name')=='ald-prod'){}			
@@ -400,7 +460,7 @@ $('#search-all').click(function(){
 					});
 					$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 					$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
-					$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')
+					$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')					
 					reload_item_info_click()
 					swal.close()
 				});
@@ -446,7 +506,7 @@ $('#search-ctg').click(function(){
 						});
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text('1/'+(Math.ceil(row_cnts/5))).end()
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page','1')
-						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')
+						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page','1')						
 						reload_item_info_click()
 						swal.close()
 					}else{
@@ -557,7 +617,7 @@ $('a[hre-type="turn-page"]').click(function(){
 						});
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text((parseInt(cur_page)-1)+'/'+sum_pages).end()
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page',(parseInt(cur_page)-1))
-						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page',(parseInt(cur_page)-1))	
+						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page',(parseInt(cur_page)-1))							
 						reload_item_info_click()
 						swal.close()						
 					}else{
@@ -579,6 +639,7 @@ $('a[hre-type="turn-page"]').click(function(){
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).parent().next().children().text((parseInt(cur_page)+1)+'/'+sum_pages).end()
 						$('a[hre-type][data-stypes="online_prod"]').eq(0).attr('cur-page',(parseInt(cur_page)+1))
 						$('a[hre-type][data-stypes="online_prod"]').eq(1).attr('cur-page',(parseInt(cur_page)+1))	
+						
 						reload_item_info_click()
 						swal.close()						
 					}else{
@@ -647,6 +708,9 @@ $('#main-nav-h li[act="login"]').click(function(){
 				swal({icon: "success", button: false,});				
 				$(this).css('display','none')
 				$(this).next().css('display','block')
+				if(JSON.parse(atob(decodeURIComponent(document.cookie.split('=')[1])))['uname']=='admin'){
+					window.open('/grp/admin')
+				}
 			}else{
 				swal({icon: "error", button: false,});
 			}

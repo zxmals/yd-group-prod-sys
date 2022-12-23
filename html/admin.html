@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+	<title>Admin</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+	<!-- <link rel="stylesheet" href="css/bootstrap-select.min.css"> -->
+	<script src="js/jquery.js"></script>
+	<script src="js/bootstrap.min.js"></script>	
+	<!-- <script src="js/bootstrap-select.min.js"></script>	 -->
+	<script src="js/sweetalert.min.js"></script>    
+</head>
+
+<body>
+    <div class="container">
+        <nav class="navbar navbar-fixed-top" style="z-index: 9999;">
+            <div class="container" >
+                <nav class="navbar-default" >
+                    <ol class="breadcrumb" style="background: linear-gradient(to right,#88c9e74d,#1e6374);">
+                        <li><a page-type="home" href="#">Admin</a></li>
+                        <li><a page-type="zb-prod" href="#">专线专区</a></li>
+                        <li class="active">…</li>
+                        <li><a href="#" act="logout">退出</a></li>
+                    </ol>
+                </nav>
+            </div>
+        </nav>
+        <div style="padding-top: 5%;display: block;" page-type="home">
+            <div class="jumbotron" style="height:50vh;z-index: 7777;">
+                <h1>Hello, Admin!</h1>
+            </div>            
+        </div>
+        <div style="padding-top: 5%;display: none;" page-type="zb-prod">
+            <span class="label label-success">共为您搜索到0条记录</span>
+            <span class="label label-primary"><a href="#"><font color="white">导出下载</font></a> <span class="glyphicon glyphicon-save"></span></span>
+            <div class="container-fluid">
+                <ul class="list-group">
+                    <li  class="list-group-item list-group-item-danger">产品名称1(产品ID) <span class="glyphicon glyphicon-book"></span></li>
+                    <li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>  2022-12-01 11:12:11</li>
+                    <li  class="list-group-item list-group-item-warning">归属层级 <span class="glyphicon glyphicon-asterisk"></span> Vestibulum at eros<span class="glyphicon glyphicon-chevron-right"></span>Vestibulum at eros <span class="glyphicon glyphicon-chevron-right"></span> Vestibulum at eros </li>					
+
+                    <li href="#" class="list-group-item list-group-item-warning">
+                        操作  <span class="glyphicon glyphicon-wrench"></span><span class="glyphicon glyphicon-option-vertical"></span>
+                        <a href="#">审核 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+                        <a href="#">产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+                        <a href="#">产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+                        <a href="#">管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>
+                        <a href="#">操作流程 <span class="glyphicon glyphicon-new-window"></span></a>
+                    </li>
+                </ul>					
+            </div>
+            <nav aria-label="">
+                <ul class="pager">
+                    <li><a href="#" hre-type="turn-page" act="pere" data-stypes="zb-prod">上一页</a></li>
+                    <li><span data-compose="curpage-pages"></span></li>
+                    <li><a href="#" hre-type="turn-page" act="next" data-stypes="zb-prod">下一页</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</body>
+<script>
+$(document).ready(function(){
+    if(document.cookie=!''){
+        if(JSON.parse(atob(decodeURIComponent(document.cookie.split('=')[1])))['uname']!='admin'){
+            window.open('/grp/home')
+        }
+    }else{
+        window.open('/grp/home')
+    }
+});
+
+// 导航栏切换
+$('a[page-type]').click(function(){
+    let pt = $(this).attr('page-type')
+    // console.log(pt)
+    $('div[page-type]').each(function(e){if($(this).attr('page-type')==pt){$(this).css('display','block')}else{$(this).css('display','none')}});
+});
+
+// 管理员退出
+$('.navbar-default li a[act="logout"]').click(function(){
+	swal({
+		title: "确认退出?",
+		icon: "warning",
+		buttons: true,
+		dangerMode: true,		
+	})
+	.then((out) => {		
+		if(out){
+			return $.post('/logout',function(data,status){return status=='success'?data:false});			
+		} else {
+			return false
+		}
+	})
+	.then((res)=>{
+		if(res){
+			// swal("已退出...",{icon: "success",});
+            window.close()
+            window.open('/grp/home')
+		}else{
+			swal("没有退出...！");
+		}
+	})    
+});
+</script>
+</html>
