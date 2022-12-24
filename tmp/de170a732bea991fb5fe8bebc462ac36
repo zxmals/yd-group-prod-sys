@@ -1,0 +1,70 @@
+﻿<!-- 长 视频 -->
+function resume(i){
+	i =+ 1
+	try{
+		study_stats = $('.focus dd span').eq(0).get(0).innerHTML.trim()
+		dur = Math.floor(document.querySelector('video').duration/60)
+		document.querySelector('video').playbackRate = dur>=18|dur<=14?1.5:2
+		if(study_stats=="已完成"){
+			document.querySelector('video').currentTime = document.querySelector('video').duration-5
+		}
+		if(document.querySelector('video').paused){
+			document.querySelector('video').play()
+		}		
+		if(!document.querySelector('video').muted){
+		 	document.querySelector('video').muted = true
+		}
+		if(document.querySelector('video').duration-document.querySelector('video').currentTime<=5&&study_stats!="已完成"){
+			document.querySelector('video').currentTime = document.querySelector('video').duration/2
+		}
+	}catch(e){}
+	setTimeout('resume('+i+')',5000)
+}
+resume(1)
+
+
+<!-- 长 图文 -->
+function picresume(i){
+	if(i<$('.chapter-main .required ').length){
+		$('.chapter-main .required ').eq(i).click()
+			console.log("resume_times:"+i++)
+		}
+		setTimeout('picresume('+i+')',1000*60)
+}
+picresume(0)
+
+
+
+<!-- 视频图文混合 -->
+function midfuc(xindex,i){
+	$('.chapter-main .required ').eq(xindex+1).click()
+	console.log("resume_times:"+i++)
+	resume(i)
+}
+
+function resume(i){
+	let class_type = $('.player-wrapper #D104container div').eq(0).attr('data-region')
+	console.log(class_type)
+	if(class_type=='video'){
+		let time_str =  $('.vjs-duration-display').eq(0).get(0).innerText.substr($('.vjs-duration-display').eq(0).get(0).innerText.lastIndexOf("\n")+1,5)
+		let time_second = parseInt(time_str.split(":")[0])*60*1000+parseInt(time_str.split(":")[1])*1000
+		if(!$('.videojs-referse-btn').hasClass('vjs-hidden')){
+			$('.videojs-referse-btn').click()
+			console.log("resume_times:"+i++)
+		}
+		setTimeout('resume('+i+')',5000)
+	}
+	if(class_type=='pdf'){
+		let xindex = 0
+		for(let i=0;i<$('.chapter-list .required').length;i++){
+			if($('.chapter-list .required').eq(i).hasClass('focus')){
+				xindex = i
+				break;
+			}
+		}
+		setTimeout('midfuc('+xindex+','+i+')',1000*60)
+	}	
+}
+
+resume(0)
+

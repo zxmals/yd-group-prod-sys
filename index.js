@@ -7,8 +7,9 @@ const date = require("silly-datetime") //引入时间获取模块
 const util = require('util'); //引入工具包
 const path = require('path'); //引入文件路径处理包
 const xlsx = require("node-xlsx"); // 引入excel解析生成工具包
-var fs = require("fs"); // 引入文件读写模块
-var str_random = require("string-random"); // 引入随机生成字符串工具包
+const fs = require("fs"); // 引入文件读写模块
+const str_random = require("string-random"); // 引入随机生成字符串工具包
+const multer  = require('multer');
 
 const app = express();
 
@@ -18,11 +19,15 @@ const connects = new connection();
 // post请求体数据解析
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
+const upload = multer({dest:'./tmp'})
+
 // 设置静态文件夹
 app.use('/grp',express.static(path.join(__dirname,'./html/public')))
 
 // cookie解析
 app.use(cookieParser())
+
+
 
 // 访问主页 + 获取五级分类数据
 app.get('/grp/home', function (req, resp) {
@@ -1014,6 +1019,32 @@ app.get('/downlowd-zb-prod',function(req,resp){
 });
 
 
+// 专线专区-文件上传
+app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{name:'op'}]),urlencodedParser,function (req, res) {
+  let file_type = req.files['fee']!=null?'fee':(req.files['desc']!=null?'desc':(req.files['man']!=null?'man':'op'))
+  let new_path = req.files['fee']!=null?'upload/zx_product/fee/':(req.files['desc']!=null?'upload/zx_product/desc/':(req.files['man']!=null?'upload/zx_product/man/':'upload/zx_product/op/'))
+  req.files[file_type][0].originalname = Buffer.from(req.files[file_type][0].originalname, "latin1").toString("utf8")
+  let offer_id = req.body.offer_id
+  // console.log(req.body.offer_id,'----------------')
+  new_path += offer_id
+  if(!fs.existsSync(new_path)){fs.mkdirSync(new_path)} // 产品目录不存在则创建目录  
+  let file_name = req.files[file_type][0].originalname
+  let tail = file_name.split('.').slice(-1)
+  let oldName = req.files[file_type][0].path;
+  let newName = new_path+'/'+req.files[file_type][0].originalname;  // 指定文件路径和文件名
+  let t_arr = ['doc','docx','xlsx','xls','txt','md']
+  let f_li = fs.readdirSync(new_path)
+  if(t_arr.filter(function(e){return e==tail}).length>0&&f_li.filter(function(e){return e==file_name}).length==0){
+    // 3. 将上传后的文件重命名
+    fs.renameSync(oldName, newName);
+    // 4. 文件上传成功,返回上传成功后的文件路径
+    res.send("上传成功！请重新进入查看文件列表。");
+  }else{
+    fs.unlinkSync(oldName)
+    res.send('上传失败！文件类型错误或文件名重复。');
+  }
+
+})
 
 
 
@@ -1024,8 +1055,3 @@ var server = app.listen(7777, function (){
   console.log("应用实例，访问地址为 http://%s:%s", host, port)
  
 });
-
-
-
-// var b = new Buffer('SmF2YVNjcmlwdA==', 'base64')
-// var s = b.toString();

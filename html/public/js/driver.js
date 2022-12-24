@@ -5,9 +5,9 @@ prod_key_words = ""
 // 预定义 已维护产品分类搜索筛选信息，防止分页查询时中途插入关键字影响
 ctg_m = null
 
-// 预定义 已维护产品模糊搜索关键字，防止分页查询时中途插入关键字影响
+// 预定义 专线产品模糊搜索关键字，防止分页查询时中途插入关键字影响
 zp_prod_key_words = ""
-// 预定义 已维护产品分类搜索筛选信息，防止分页查询时中途插入关键字影响
+// 预定义 专线产品分类搜索筛选信息，防止分页查询时中途插入关键字影响
 zp_ctg_m = null
 
 $(document).ready(function(){
@@ -185,31 +185,90 @@ $('#item-info .modal-footer button[act="export-data"]').click(function(){
 // 查看从属账单科目信息-需重载函数
 reload_item_info_click=function(){
 	$('a[data_prod]').click(function(){
-		offer_id = $(this).attr('data_prod')
-		offer_info = $('#main-nav-h li[name="zb-prod"').hasClass('active')?$(this).parent().siblings().eq(0).text():$(this).siblings().eq(0).text()
-		$('#item-info .modal-header h4').text(offer_info+'下属账单科目')
-		swal('加载中……',{button:false});
-		$.post('/get-item-info-by-offerid',{offer_id:offer_id},function(data,status){			
-			if(status){
-				$('#item-info .modal-body tbody tr').remove()
-				data.forEach(function(e){
-					ht = '<tr class="info">'
-					ht += '<td class="col-md-1">'+e['rn']+'</td>'									
-					ht += e['item_name'].length>20 ? '<td class="col-md-8" data-toggle="popover"  title="科目名称"  data-content="'+e['item_name']+'"><a href="#">'+e['item_name'].substr(0,17)+'...</a></td>':'<td class="col-md-8">'+e['item_name']+'</td>'
-					ht += '<td class="col-md-3">'+e['item_id']+'</td>'
-					$('#item-info .modal-body tbody').append(ht)
-				});
-				$('#item-info .modal-footer button[act="export-data"]').attr('offer_info',offer_info)
-				$('#item-info .modal-footer button[act="export-data"]').attr('offer_id',offer_id)
-				reload_item_td_info()
-				swal.close()
-			}else{
-				swal('查询错误！',{button:false})
-			}
-		});
-		$('#item-info').modal('show')
+		if($(this).text().trim()=='下属账单科目'){
+			offer_id = $(this).attr('data_prod')
+			offer_info = $('#main-nav-h li[name="zb-prod"').hasClass('active')?$(this).parent().siblings().eq(0).text():$(this).siblings().eq(0).text()
+			$('#item-info .modal-header h4').text(offer_info+'下属账单科目')
+			swal('加载中……',{button:false});
+			$.post('/get-item-info-by-offerid',{offer_id:offer_id},function(data,status){
+				if(status){
+					$('#item-info .modal-body tbody tr').remove()
+					data.forEach(function(e){
+						ht = '<tr class="info">'
+						ht += '<td class="col-md-1">'+e['rn']+'</td>'
+						ht += e['item_name'].length>20 ? '<td class="col-md-8" data-toggle="popover"  title="科目名称"  data-content="'+e['item_name']+'"><a href="#">'+e['item_name'].substr(0,17)+'...</a></td>':'<td class="col-md-8">'+e['item_name']+'</td>'
+						ht += '<td class="col-md-3">'+e['item_id']+'</td>'
+						$('#item-info .modal-body tbody').append(ht)
+					});
+					$('#item-info .modal-footer button[act="export-data"]').attr('offer_info',offer_info)
+					$('#item-info .modal-footer button[act="export-data"]').attr('offer_id',offer_id)
+					reload_item_td_info()
+					swal.close()
+				}else{
+					swal('查询错误！',{button:false})
+				}
+			});
+			$('#item-info').modal('show')
+		}
 	});
+}
 
+$('#sub-upload').click(function(){
+	let file = $(this).prev().children().find('input[type="file"]')[0].files[0]
+	let fd = new FormData()
+	console.log($(this).prev().children().find('input[type="file"]').attr('name'))
+	fd.append($(this).prev().children().find('input[type="file"]').attr('name'),file)
+	fd.append('offer_id',$(this).prev().children().find('input[type="file"]').attr('data_prod'))
+	$.ajax({
+           type : 'post',
+           url : '/file_upload',
+           data : fd,
+           cache : false,
+           processData : false, // 不处理发送的数据，因为data值是Formdata对象，不需要对数据做处理
+           contentType : false, // 不设置Content-type请求头
+           success : function(res){ swal(res,{button:false}) },
+           error : function(res){ swal(res,{button:false})}
+       });
+});
+
+// 查看专线产品信息(介绍、管理办法、资费、操作流程)-需重载函数
+reload_zp_prod_info_click=function(){
+	$('div[data-id="zb-prod"] a[data_prod]').click(function(){
+		var offer_id = $(this).attr('data_prod')
+		var modal_title = '专线专区 | '+$(this).parent().siblings().eq(0).text()+' | '+$(this).text().trim()		
+		$('#zp-prod-info-upload form input[type="file"]').attr('data_prod',offer_id)
+
+		if($(this).text().trim()=='产品介绍'){
+			$('#zp-prod-info .modal-header h4').text(modal_title)			
+			$('#zp-prod-info-upload form input[type="file"]').attr('name','desc')
+			$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的介绍文档。Tips: .doc .docx .txt .xlsx .xls')
+			// $.post('/get-zb-prod-info-desc',{offer_id:offer_id},function(data,status){
+				
+			// });
+			$('#zp-prod-info').modal('show');
+		}
+		if($(this).text().trim()=='产品资费'){
+			$('#zp-prod-info .modal-header h4').text(modal_title)
+			$('#zp-prod-info-upload form input[type="file"]').attr('name','fee')
+			$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的资费文档。Tips: .doc .docx .txt .xlsx .xls')
+			
+			$('#zp-prod-info').modal('show');			
+		}
+		if($(this).text().trim()=='管理办法'){
+			$('#zp-prod-info .modal-header h4').text(modal_title)
+			$('#zp-prod-info-upload form input[type="file"]').attr('name','man')			
+			$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的管理文档。Tips: .doc .docx .txt .xlsx .xls')
+			
+			$('#zp-prod-info').modal('show');			
+		}
+		if($(this).text().trim()=='操作流程'){
+			$('#zp-prod-info .modal-header h4').text(modal_title)
+			$('#zp-prod-info-upload form input[type="file"]').attr('name','op')
+			$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的操作文档。Tips: .doc .docx .txt .xlsx .xls')
+			
+			$('#zp-prod-info').modal('show');
+		}						
+	});
 }
 
 // 设置待维护账单科目 html 部分
@@ -271,11 +330,10 @@ function append_zb_prod_html(offer_id,offer_name,eff_date,catg_name1,catg_name2,
 	ht += catg_name4!=''&&catg_name4!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name4:''
 	ht += catg_name5!=''&&catg_name5!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name5:''
 	ht += '</li><li class="list-group-item list-group-item-info"><a href="#" data_prod="'+offer_id+'" >下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
-	ht += '<a href="#">产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
-	ht += '<a href="#">产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
-	ht += '<a href="#">管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
-	ht += '<a href="#">操作流程 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
-	ht += '<a href="#">近期维护 <span class="glyphicon glyphicon-new-window"></span></a>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >操作流程 <span class="glyphicon glyphicon-new-window"></span></a>'	
 	ht += '</li></ul>'
 	return ht
 }
@@ -395,6 +453,7 @@ $('#main-nav-h li[name!="log"]').click(function(){
 							$('a[hre-type][data-stypes="zb-prod"]').eq(0).attr('cur-page','1')
 							$('a[hre-type][data-stypes="zb-prod"]').eq(1).attr('cur-page','1')							
 							reload_item_info_click()
+							reload_zp_prod_info_click()
 							swal.close()							
 						}else{
 							swal('查询错误！',{button:false})
@@ -503,6 +562,7 @@ $('#search-all').click(function(){
 						$('a[hre-type][data-stypes="zb-prod"]').eq(0).attr('cur-page','1')
 						$('a[hre-type][data-stypes="zb-prod"]').eq(1).attr('cur-page','1')
 						reload_item_info_click()
+						reload_zp_prod_info_click()
 						swal.close()
 					}else{
 						swal('查询错误！',{button:false});
@@ -584,6 +644,7 @@ $('#search-ctg').click(function(){
 						$('a[hre-type][data-stypes="zb-prod"]').eq(0).attr('cur-page','1')
 						$('a[hre-type][data-stypes="zb-prod"]').eq(1).attr('cur-page','1')						
 						reload_item_info_click()
+						reload_zp_prod_info_click()
 						swal.close()
 					}else{
 						swal('查询错误！',{button:false});
@@ -751,6 +812,7 @@ $('a[hre-type="turn-page"]').click(function(){
 						$('a[hre-type][data-stypes="zb-prod"]').eq(0).attr('cur-page',(parseInt(cur_page)-1))
 						$('a[hre-type][data-stypes="zb-prod"]').eq(1).attr('cur-page',(parseInt(cur_page)-1))							
 						reload_item_info_click()
+						reload_zp_prod_info_click()
 						swal.close()						
 					}else{
 						swal('查询错误！',{button:false});
@@ -771,7 +833,7 @@ $('a[hre-type="turn-page"]').click(function(){
 						$('a[hre-type][data-stypes="zb-prod"]').eq(0).parent().next().children().text((parseInt(cur_page)+1)+'/'+sum_pages).end()
 						$('a[hre-type][data-stypes="zb-prod"]').eq(0).attr('cur-page',(parseInt(cur_page)+1))
 						$('a[hre-type][data-stypes="zb-prod"]').eq(1).attr('cur-page',(parseInt(cur_page)+1))	
-						
+						reload_zp_prod_info_click()
 						reload_item_info_click()
 						swal.close()						
 					}else{
