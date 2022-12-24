@@ -670,7 +670,7 @@ app.get('/downlowd-online-prod',function(req,resp){
  * 
  ***/
 
-// 获取已维护产品总记录数
+// 获取专线产品总记录数
 app.post('/get-zb-prod-info-cnts',urlencodedParser,function(req,resp){
   var call = function(err,res){
     if(err){
@@ -693,7 +693,7 @@ app.post('/get-zb-prod-info-cnts',urlencodedParser,function(req,resp){
 });
 
 
-// 获取已维护产品信息
+// 获取专线产品信息
 app.post('/get-zb-prod-info',urlencodedParser,function(req,resp){
   var call = function(err,res){
     if(err){
@@ -717,6 +717,276 @@ app.post('/get-zb-prod-info',urlencodedParser,function(req,resp){
   dates.setDate(dates.getDate()-1)
   execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)  
 });
+
+// 获取专线产品总记录数-模糊查询
+app.post('/get-zb-prod-info-ky-cnts',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  key_word = req.body.keyw
+  sql = 
+    " select count(1) cnts "+
+    " from ( "+
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   ,b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%')  "+
+    " )a  "+
+    " where ( "+
+    "      offer_id like '%"+key_word+"%' "+
+    " or offer_name like '%"+key_word+"%' "+
+    " or catg_name1 like '%"+key_word+"%' "+
+    " or catg_name2 like '%"+key_word+"%' "+
+    " or catg_name3 like '%"+key_word+"%' "+
+    " or catg_name4 like '%"+key_word+"%' "+
+    " or catg_name5 like '%"+key_word+"%' "+
+    " ) "
+    // " order by catg_id1,catg_id2,catg_id3,catg_id4,catg_id5 "+    
+    // " limit 0,5"
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call) 
+});
+
+// 获取专线产品信息-模糊查询
+app.post('/get-zb-prod-info-ky',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  key_word = req.body.keyw
+  sql = 
+    " select * "+
+    " from ( "+
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   ,b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%')  "+
+    " )a  "+
+    " where ( "+
+    "      offer_id like '%"+key_word+"%' "+
+    " or offer_name like '%"+key_word+"%' "+
+    " or catg_name1 like '%"+key_word+"%' "+
+    " or catg_name2 like '%"+key_word+"%' "+
+    " or catg_name3 like '%"+key_word+"%' "+
+    " or catg_name4 like '%"+key_word+"%' "+
+    " or catg_name5 like '%"+key_word+"%' "+
+    " ) "+
+    " order by offer_id "+    
+    " limit 0,5"    
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call) 
+});
+
+
+// 获取专线产品总记录数-分类查询
+app.post('/get-zb-prod-info-ctg-cnts',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  ctg_1 = req.body.ctg1
+  ctg_2 = req.body.ctg2
+  ctg_3 = req.body.ctg3
+  ctg_4 = req.body.ctg4
+  ctg_5 = req.body.ctg5
+  sql = 
+    " select count(1)cnts "+
+    " from ( "+
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   ,b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%')  "+
+    " )a  "+
+    " where 1=1 "
+  sql += ctg_1!=null?" and catg_id1 LIKE '%"+ctg_1+"%'":""
+  sql += ctg_2!=null?" and catg_id2 LIKE '%"+ctg_2+"%'":""
+  sql += ctg_3!=null?" and catg_id3 LIKE '%"+ctg_3+"%'":""
+  sql += ctg_4!=null?" and catg_id4 LIKE '%"+ctg_4+"%'":""
+  sql += ctg_5!=null?" and catg_id5 LIKE '%"+ctg_5+"%'":""
+
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call) 
+});
+
+
+// 获取专线产品信息-分类查询
+app.post('/get-zb-prod-info-ctg',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  ctg_1 = req.body.ctg1
+  ctg_2 = req.body.ctg2
+  ctg_3 = req.body.ctg3
+  ctg_4 = req.body.ctg4
+  ctg_5 = req.body.ctg5
+  sql = 
+    " select count(1)cnts "+
+    " from ( "+
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   ,b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%')  "+
+    " )a  "+
+    " where 1=1 "
+  sql += ctg_1!=null?" and catg_id1 LIKE '%"+ctg_1+"%'":""
+  sql += ctg_2!=null?" and catg_id2 LIKE '%"+ctg_2+"%'":""
+  sql += ctg_3!=null?" and catg_id3 LIKE '%"+ctg_3+"%'":""
+  sql += ctg_4!=null?" and catg_id4 LIKE '%"+ctg_4+"%'":""
+  sql += ctg_5!=null?" and catg_id5 LIKE '%"+ctg_5+"%'":""  
+  sql += " order by offer_id limit 0,5"
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call) 
+});
+
+//专线产品分页查询-下一页
+app.post('/next-zb-prod-page',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  var key_words = req.body.keyw
+  var ctg_1 = req.body.ctg1
+  var ctg_2 = req.body.ctg2
+  var ctg_3 = req.body.ctg3
+  var ctg_4 = req.body.ctg4
+  var ctg_5 = req.body.ctg5  
+  var cur_page = parseInt(req.body.cur_page)
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  sql = 
+    " select * "+
+    " from ( "+
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   ,b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%')  "+
+    "   order by b.catg_id1 "+
+    " )a  "+
+    " where 1=1 "
+  if(key_words!=''&&key_words!=null){
+    sql += " and (offer_id like '%"+key_word+"%' "
+    sql += " or offer_name like '%"+key_word+"%' "
+    sql += " or catg_name1 like '%"+key_word+"%' "
+    sql += " or catg_name2 like '%"+key_word+"%' "
+    sql += " or catg_name3 like '%"+key_word+"%' "
+    sql += " or catg_name4 like '%"+key_word+"%' "
+    sql += " or catg_name5 like '%"+key_word+"%') "
+  }else{
+    sql += ctg_1!=null?" and catg_id1 LIKE '%"+ctg_1+"%'":""
+    sql += ctg_2!=null?" and catg_id2 LIKE '%"+ctg_2+"%'":""
+    sql += ctg_3!=null?" and catg_id3 LIKE '%"+ctg_3+"%'":""
+    sql += ctg_4!=null?" and catg_id4 LIKE '%"+ctg_4+"%'":""
+    sql += ctg_5!=null?" and catg_id5 LIKE '%"+ctg_5+"%'":""      
+  }
+  sql += " order by offer_id limit ?,5"
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),(cur_page*5),],call)  
+});
+
+
+//专线产品分页查询-上一页
+app.post('/pere-zb-prod-page',urlencodedParser,function(req,resp){
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    resp.json(res)
+  }
+  var key_words = req.body.keyw
+  var ctg_1 = req.body.ctg1
+  var ctg_2 = req.body.ctg2
+  var ctg_3 = req.body.ctg3
+  var ctg_4 = req.body.ctg4
+  var ctg_5 = req.body.ctg5  
+  var cur_page = parseInt(req.body.cur_page)
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  sql = 
+    " select * "+
+    " from ( "+
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   ,b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    " and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%')  "+
+    "   order by b.catg_id1 "+
+    " )a  "+
+    " where 1=1 "
+  if(key_words!=''&&key_words!=null){
+    sql += " and (offer_id like '%"+key_word+"%' "
+    sql += " or offer_name like '%"+key_word+"%' "
+    sql += " or catg_name1 like '%"+key_word+"%' "
+    sql += " or catg_name2 like '%"+key_word+"%' "
+    sql += " or catg_name3 like '%"+key_word+"%' "
+    sql += " or catg_name4 like '%"+key_word+"%' "
+    sql += " or catg_name5 like '%"+key_word+"%') "
+  }else{
+    sql += ctg_1!=null?" and catg_id1 LIKE '%"+ctg_1+"%'":""
+    sql += ctg_2!=null?" and catg_id2 LIKE '%"+ctg_2+"%'":""
+    sql += ctg_3!=null?" and catg_id3 LIKE '%"+ctg_3+"%'":""
+    sql += ctg_4!=null?" and catg_id4 LIKE '%"+ctg_4+"%'":""
+    sql += ctg_5!=null?" and catg_id5 LIKE '%"+ctg_5+"%'":""      
+  }
+  sql += " order by offer_id limit ?,5"
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),((cur_page-2)*5),],call)  
+});
+
+
+
+
+
+
+
 
 // 服务启动监听端口:7777
 var server = app.listen(7777, function (){
