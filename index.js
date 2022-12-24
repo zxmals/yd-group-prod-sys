@@ -982,7 +982,36 @@ app.post('/pere-zb-prod-page',urlencodedParser,function(req,resp){
 });
 
 
-
+// 导出下载-专线产品专区
+app.get('/downlowd-zb-prod',function(req,resp){
+  filename = encodeURIComponent('专线产品明细.xlsx')
+  resp.set({'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename='+filename})
+  data = []
+  data.push(['产品编码','产品名称','上线日期','一级分类','二级分类','三级分类','四级分类','五级分类','四位科目'])  
+  var call = function(err,res){
+    if(err){
+      console.log(err.message)
+      return
+    }
+    res.forEach(function(e){
+      data.push([e['offer_id'],e['offer_name'],e['eff_date'],e['catg_name1'],e['catg_name2'],e['catg_name3'],e['catg_name4'],e['catg_name5'],e['biz_code']]);
+    });
+    resp.send(xlsx.build([{'name':'sheet1',data:data}]))
+  }
+  sql = 
+    "   select  a.offer_id,a.offer_name,a.eff_date "+
+    "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
+    "   from product a  "+
+    "   left join ( "+
+    "     select * from ent_product_ctg_zx "+
+    "   ) b on a.biz_code=b.biz_code "+
+    "   where a.online_stat = 1 and b.catg_id1 is not null and a.op_date = ? "+
+    "   and (b.catg_name3 like '%专线%' or b.catg_name4 like '%专线%' or b.catg_name5 like '%专线%') "+
+    "   order by b.catg_id1,b.catg_id2,b.catg_id3,b.catg_id4,b.catg_id5 "
+  dates = new Date()
+  dates.setDate(dates.getDate()-1)
+  execute_sql(sql,[date.format(dates,'YYYY-MM-DD'),],call)
+});
 
 
 

@@ -186,7 +186,7 @@ $('#item-info .modal-footer button[act="export-data"]').click(function(){
 reload_item_info_click=function(){
 	$('a[data_prod]').click(function(){
 		offer_id = $(this).attr('data_prod')
-		offer_info = $(this).siblings().eq(0).text()
+		offer_info = $('#main-nav-h li[name="zb-prod"').hasClass('active')?$(this).parent().siblings().eq(0).text():$(this).siblings().eq(0).text()
 		$('#item-info .modal-header h4').text(offer_info+'下属账单科目')
 		swal('加载中……',{button:false});
 		$.post('/get-item-info-by-offerid',{offer_id:offer_id},function(data,status){			
@@ -609,6 +609,10 @@ $('div[data-ts="show-contents"] span').click(function(){
 		// console.log('--------------------online-prod-download---------------------------')
 		window.open('/downlowd-online-prod')
 	}	
+	if($(this).parent().attr('data-id')=='zb-prod'&&$(this).find('font').text()=='导出下载'){
+		// console.log('--------------------online-prod-download---------------------------')
+		window.open('/downlowd-zb-prod')
+	}		
 });
 
 // 分页管理
