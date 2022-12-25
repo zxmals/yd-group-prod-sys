@@ -1028,7 +1028,7 @@ app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{
   let offer_id = req.body.offer_id
   // console.log(req.body.offer_id,'----------------')
   new_path += offer_id
-  if(!fs.existsSync(new_path)){fs.mkdirSync(new_path)} // 产品目录不存在则创建目录  
+  if(!fs.existsSync(new_path)){fs.mkdirSync(new_path,766)} // 产品目录不存在则创建目录  
   let file_name = req.files[file_type][0].originalname
   // let tail = file_name.split('.').slice(-1)
   let tail = path.extname(file_name);
