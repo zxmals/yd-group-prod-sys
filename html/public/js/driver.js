@@ -238,7 +238,7 @@ $('#sub-upload').click(function(){
 	           			swal(res,{button:false})
 	           			if(res=='上传成功!'){
 		           			ht = '<tr class="info">'
-							ht += '<td class="col-md-8">'+file['name']+'</td>'
+							ht += '<td class="col-md-8" title="'+file['name']+'">'+file['name']+'</td>'
 							ht += '<td class="col-md-2"><a title="下载" act="download" href="#"><span class="glyphicon glyphicon-download-alt"></span></a></td>'
 							ht += '<td class="col-md-2"><a title="删除" href="#" act="remove" ><span class="glyphicon glyphicon-remove"></span></a></td>'
 							ht += '</tr>'
@@ -1017,9 +1017,9 @@ $('#main-nav-h li[act="login"]').click(function(){
 				swal({icon: "success", button: false,});				
 				$(this).css('display','none')
 				$(this).next().css('display','block')
-				if(JSON.parse(atob(decodeURIComponent(document.cookie.split('=')[1])))['uname']=='admin'){
-					window.open('/grp/admin')
-				}
+				// if(JSON.parse(atob(decodeURIComponent(document.cookie.split('=')[1])))['uname']=='admin'){
+				// 	window.open('/grp/admin')
+				// }
 			}else{
 				swal({icon: "error", button: false,});
 			}

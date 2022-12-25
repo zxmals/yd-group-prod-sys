@@ -1054,8 +1054,8 @@ app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{
                 return console.error(err);
               }
              });
+            fs.close(fd)
           });
-          fs.close()
           // 4. 文件上传成功,返回上传成功后的文件路径
           resp.send("上传成功!");
         }else{
@@ -1188,9 +1188,9 @@ app.post('/remove-zb-prod-doc',urlencodedParser,function(req,resp){
               if(err){
                 return console.error(err);
               }
-             });            
-          });
-          fs.close()
+             });
+             fs.close(fd)           
+          });          
           resp.send('已删除!')
         }else{
           resp.send('请登录后操作！')
