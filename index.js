@@ -9,7 +9,8 @@ const path = require('path'); //引入文件路径处理包
 const xlsx = require("node-xlsx"); // 引入excel解析生成工具包
 const fs = require("fs"); // 引入文件读写模块
 const str_random = require("string-random"); // 引入随机生成字符串工具包
-const multer  = require('multer');
+const multer  = require('multer');   //解析上传文件  
+const readline  = require('readline');  // 按行读取文件
 
 const app = express();
 
@@ -1029,10 +1030,11 @@ app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{
   new_path += offer_id
   if(!fs.existsSync(new_path)){fs.mkdirSync(new_path)} // 产品目录不存在则创建目录  
   let file_name = req.files[file_type][0].originalname
-  let tail = file_name.split('.').slice(-1)
+  // let tail = file_name.split('.').slice(-1)
+  let tail = path.extname(file_name);
   let oldName = req.files[file_type][0].path;
   let newName = new_path+'/'+req.files[file_type][0].originalname;  // 指定文件路径和文件名
-  let t_arr = ['doc','docx','xlsx','xls','txt','md']
+  let t_arr = ['.doc','.docx','.xlsx','.xls','.txt','.md']
   let f_li = fs.readdirSync(new_path)
 
   if(req.cookies.session!=null){
@@ -1052,9 +1054,10 @@ app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{
                 return console.error(err);
               }
              });
-          });          
+          });
+          fs.close()
           // 4. 文件上传成功,返回上传成功后的文件路径
-          resp.send("上传成功！请重新进入查看文件列表。");
+          resp.send("上传成功!");
         }else{
           fs.unlinkSync(oldName)
           resp.send('上传失败！文件类型错误或文件名重复。');
@@ -1187,6 +1190,7 @@ app.post('/remove-zb-prod-doc',urlencodedParser,function(req,resp){
               }
              });            
           });
+          fs.close()
           resp.send('已删除!')
         }else{
           resp.send('请登录后操作！')
@@ -1200,6 +1204,37 @@ app.post('/remove-zb-prod-doc',urlencodedParser,function(req,resp){
   }
 });
 
+// 专线专区-查看近期维护
+app.post('/get-zb-prod-ch',urlencodedParser,function(req,resp){
+  let offer_id = req.body.offer_id
+  let prod_type = req.body.prod_type
+  let dest_path = 'upload/zx_product/'
+  dest_path += prod_type=='desc'?'desc/':(prod_type=='fee'?'fee/':(prod_type=='man'?'man/':'op/'))
+  dest_path += offer_id
+  dest_path += '/log.txt'
+  // console.log(dest_path)
+  try{
+    if(fs.existsSync(dest_path)){
+      let rl = readline.createInterface({
+        input: fs.createReadStream(dest_path)
+      })
+      let res_li = []
+      let res_m = {}
+      rl.on('line', line => {
+        res_li.push(line.split("|"))
+        if(res_li.length>5){
+          res_li.splice(0,1)
+        }
+      }).on('close',function(){
+        // console.log(res_li)
+        resp.json(res_li)
+      })
+    }
+  }catch(e){
+    resp.json('')
+    console.error(e)
+  }
+});
 
 // 服务启动监听端口:7777
 var server = app.listen(7777, function (){

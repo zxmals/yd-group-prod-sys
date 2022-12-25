@@ -11,7 +11,15 @@ zp_prod_key_words = ""
 zp_ctg_m = null
 
 $(document).ready(function(){
-	if(document.cookie.split('=')[0]=='session'&&document.cookie.split('=')[1].substring(0,2)=='ey'){
+	cookies = document.cookie
+	cookies = cookies.split(';')
+	logstat = ''
+	cookies.forEach((e)=>{
+		if(e.trim().split('=')[0]=='session'){
+			logstat = e.trim()
+		}
+	});
+	if(logstat.split('=')[0]=='session'&&logstat.split('=')[1].substring(0,2)=='ey'){
 		$('#main-nav-h li[act="login"]').css('display','none')
 		$('#main-nav-h li[act="logout"]').css('display','block')
 	}else{
@@ -216,7 +224,7 @@ reload_item_info_click=function(){
 $('#sub-upload').click(function(){
 	let file = $(this).prev().children().find('input[type="file"]')[0].files[0]
 	let fd = new FormData()
-	console.log($(this).prev().children().find('input[type="file"]').attr('name'))
+	// console.log($(this).prev().children().find('input[type="file"]').attr('name'))
 	fd.append($(this).prev().children().find('input[type="file"]').attr('name'),file)
 	fd.append('offer_id',$(this).prev().children().find('input[type="file"]').attr('data_prod'))
 	$.ajax({
@@ -226,7 +234,18 @@ $('#sub-upload').click(function(){
            cache : false,
            processData : false, // 不处理发送的数据，因为data值是Formdata对象，不需要对数据做处理
            contentType : false, // 不设置Content-type请求头
-           success : function(res){ swal(res,{button:false}) },
+           success : function(res){
+	           			swal(res,{button:false})
+	           			if(res=='上传成功!'){
+		           			ht = '<tr class="info">'
+							ht += '<td class="col-md-8">'+file['name']+'</td>'
+							ht += '<td class="col-md-2"><a title="下载" act="download" href="#"><span class="glyphicon glyphicon-download-alt"></span></a></td>'
+							ht += '<td class="col-md-2"><a title="删除" href="#" act="remove" ><span class="glyphicon glyphicon-remove"></span></a></td>'
+							ht += '</tr>'
+							$('#zp-prod-info .modal-body tbody').append(ht)
+							reload_zp_prod_info_download()
+	           			}
+           },
            error : function(res){ swal(res,{button:false})}
        });
 });
@@ -236,7 +255,7 @@ reload_zp_prod_info_download = function(){
 	$('#zp-prod-info tbody td a[act="download"]').click(function(){
 		offer_id = $('#zp-prod-info .modal-header').attr('data_prod')
 		prod_type = $('#zp-prod-info .modal-header').attr('prod_type')
-		filename = $(this).parent().siblings().eq(0).text()
+		filename = $(this).parent().siblings().eq(0).attr('title')
 		// console.log(,offer_id,prod_type)
 		window.open('/download-zb-prod-doc?offer_id='+offer_id+'&prod_type='+prod_type+'&filename='+filename)
 	});
@@ -244,7 +263,7 @@ reload_zp_prod_info_download = function(){
 	$('#zp-prod-info tbody td a[act="remove"]').click(function(){
 		offer_id = $('#zp-prod-info .modal-header').attr('data_prod')
 		prod_type = $('#zp-prod-info .modal-header').attr('prod_type')
-		filename = $(this).parent().siblings().eq(0).text()
+		filename = $(this).parent().siblings().eq(0).attr('title')
 		swal({
 			title: "确认删除?",
 			icon: "warning",
@@ -282,7 +301,7 @@ function get_zb_prod_infos(url,offer_id,modal_title,prod_type,prod_type1){
 			if(data.length>0){
 				data.forEach(function(e){
 					ht = '<tr class="info">'
-					ht += '<td class="col-md-8">'+e+'</td>'
+					ht += '<td class="col-md-8" title="'+e+'">'+(e.length>33?(e.substr(0,30)+'...'):e)+'</td>'
 					ht += '<td class="col-md-2"><a title="下载" act="download" href="#"><span class="glyphicon glyphicon-download-alt"></span></a></td>'
 					ht += '<td class="col-md-2"><a title="删除" href="#" act="remove" ><span class="glyphicon glyphicon-remove"></span></a></td>'
 					ht += '</tr>'
@@ -299,9 +318,36 @@ function get_zb_prod_infos(url,offer_id,modal_title,prod_type,prod_type1){
 }
 
 
+// 专线专区获取产品介绍、管理办法、资费、操作流程-维护记录
+function get_zb_prod_info_ch(url,offer_id,modal_title,prod_type){
+	$('#zp-prod-info-ch .modal-header h4').text(modal_title)
+
+	$('#zp-prod-info-ch').modal('show');
+	$('#zp-prod-info-ch .modal-body tbody tr').remove()
+	$.post(url,{offer_id:offer_id,prod_type:prod_type},function(data,status){
+		if(status){			
+			if(data.length>0){
+				data.forEach(function(e){
+					ht = '<tr class="info">'
+					ht += '<td class="col-md-5" title="'+e[2]+'">'+(e[2].length>33?(e[2].substr(0,30)+'...'):e[2])+'</td>'
+					ht += '<td class="col-md-2" >'+e[0]+'</td>'
+					ht += '<td class="col-md-2" >'+e[1]+'</td>'
+					ht += '<td class="col-md-3" >'+e[3]+'</td>'		
+					ht += '</tr>'
+					$('#zp-prod-info-ch .modal-body tbody').append(ht)
+				});
+			}else{
+				swal('查无！',{button:false})
+			}
+		}else{
+			swal('查询错误！',{button:false})
+		}
+	});	
+}
+
 // 查看专线产品信息(介绍、管理办法、资费、操作流程)-需重载函数
 reload_zp_prod_info_click=function(){
-	$('div[data-id="zb-prod"] a[data_prod]').click(function(){
+	$('div[data-id="zb-prod"] li[datainfo] a[data_prod]').click(function(){
 		var offer_id = $(this).attr('data_prod')
 		var modal_title = '专线专区 | '+$(this).parent().siblings().eq(0).text()+' | '+$(this).text().trim()		
 		$('#zp-prod-info-upload form input[type="file"]').attr('data_prod',offer_id)
@@ -317,9 +363,25 @@ reload_zp_prod_info_click=function(){
 		}
 		if($(this).text().trim()=='操作流程'){
 			get_zb_prod_infos('/get-zb-prod-op',offer_id,modal_title,'op','操作文档')
-		}						
+		}								
 	});
 
+	$('div[data-id="zb-prod"] li[datach] a[data_prod]').click(function(){
+		var offer_id = $(this).attr('data_prod')
+		var modal_title = '专线专区 | '+$(this).parent().siblings().eq(0).text()+' | '+$(this).text().trim()+' | 维护记录'
+		if($(this).text().trim()=='产品介绍'){
+			get_zb_prod_info_ch('/get-zb-prod-ch',offer_id,modal_title,'desc')
+		}
+		if($(this).text().trim()=='产品资费'){
+			get_zb_prod_info_ch('/get-zb-prod-ch',offer_id,modal_title,'fee')				
+		}
+		if($(this).text().trim()=='管理办法'){
+			get_zb_prod_info_ch('/get-zb-prod-ch',offer_id,modal_title,'man')		
+		}
+		if($(this).text().trim()=='操作流程'){
+			get_zb_prod_info_ch('/get-zb-prod-ch',offer_id,modal_title,'op')		
+		}		
+	});
 }
 
 
@@ -374,20 +436,27 @@ function append_zb_prod_html(offer_id,offer_name,eff_date,catg_name1,catg_name2,
 	var ht=""
 	ht = '<ul class="list-group" data-search="true"><li  class="list-group-item list-group-item-danger">'
 	ht += offer_name+'('+offer_id+')'
-	ht += ' <span class="glyphicon glyphicon-book"></span></li><li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-asterisk"></span>'
+	ht += ' <span class="glyphicon glyphicon-book"></span></li><li  class="list-group-item list-group-item-info">上线日期 <span class="glyphicon glyphicon-option-vertical"></span>'
 	ht += new Date(Date.parse(eff_date)).toLocaleString().split(' ')[0].replace(/\//g,'-')
-	ht += '</li><li  class="list-group-item list-group-item-warning">归属层级 <span class="glyphicon glyphicon-asterisk"></span>'
+	ht += '</li><li  class="list-group-item list-group-item-warning">归属层级 <span class="glyphicon glyphicon-option-vertical"></span>'
 	ht += catg_name1
 	ht += catg_name2!=''&&catg_name2!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name2:''
 	ht += catg_name3!=''&&catg_name3!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name3:''
 	ht += catg_name4!=''&&catg_name4!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name4:''
 	ht += catg_name5!=''&&catg_name5!=null?'<span class="glyphicon glyphicon-chevron-right"></span>'+catg_name5:''
-	ht += '</li><li class="list-group-item list-group-item-info"><a href="#" data_prod="'+offer_id+'" >下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	
+	ht += '</li><li class="list-group-item list-group-item-info" datainfo>信息查阅<span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >下属账单科目 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
 	ht += '<a href="#" data_prod="'+offer_id+'" >产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
 	ht += '<a href="#" data_prod="'+offer_id+'" >产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
 	ht += '<a href="#" data_prod="'+offer_id+'" >管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
-	ht += '<a href="#" data_prod="'+offer_id+'" >操作流程 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
-	ht += '<a href="#" data_prod="'+offer_id+'" >近期维护 <span class="glyphicon glyphicon-new-window"></span></a>'	
+	ht += '<a href="#" data_prod="'+offer_id+'" >操作流程 <span class="glyphicon glyphicon-new-window"></span></a></li>'
+	
+	ht += '</li><li  class="list-group-item list-group-item-warning" datach>近期维护<span class="glyphicon glyphicon-option-vertical"></span>'	
+	ht += '<a href="#" data_prod="'+offer_id+'" >产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >操作流程 <span class="glyphicon glyphicon-new-window"></span></a></li>'	
 	ht += '</li></ul>'
 	return ht
 }
