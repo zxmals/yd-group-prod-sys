@@ -230,6 +230,74 @@ $('#sub-upload').click(function(){
            error : function(res){ swal(res,{button:false})}
        });
 });
+// 专线维护专区-产品介绍、管理办法、资费、操作流程-下载-删除-需重载
+reload_zp_prod_info_download = function(){
+
+	$('#zp-prod-info tbody td a[act="download"]').click(function(){
+		offer_id = $('#zp-prod-info .modal-header').attr('data_prod')
+		prod_type = $('#zp-prod-info .modal-header').attr('prod_type')
+		filename = $(this).parent().siblings().eq(0).text()
+		// console.log(,offer_id,prod_type)
+		window.open('/download-zb-prod-doc?offer_id='+offer_id+'&prod_type='+prod_type+'&filename='+filename)
+	});
+
+	$('#zp-prod-info tbody td a[act="remove"]').click(function(){
+		offer_id = $('#zp-prod-info .modal-header').attr('data_prod')
+		prod_type = $('#zp-prod-info .modal-header').attr('prod_type')
+		filename = $(this).parent().siblings().eq(0).text()
+		swal({
+			title: "确认删除?",
+			icon: "warning",
+			buttons: true,
+			dangerMode: true,		
+		})
+		.then((del) => {
+			if(del){
+				return $.post('/remove-zb-prod-doc',{offer_id:offer_id,prod_type:prod_type,filename:filename},function(data,status){return status=='success'?data:false});			
+			} else {
+				return false
+			}
+		})
+		.then((res)=>{
+			if(res){
+				swal(res,{button:false})
+				if(res=='已删除!'){$(this).parent().parent().remove()}				
+			}
+		});
+	});	
+}
+
+// 专线专区获取产品介绍、管理办法、资费、操作流程
+function get_zb_prod_infos(url,offer_id,modal_title,prod_type,prod_type1){
+	$('#zp-prod-info .modal-header h4').text(modal_title)
+	$('#zp-prod-info .modal-header').attr('data_prod',offer_id)
+	$('#zp-prod-info .modal-header').attr('prod_type',prod_type)
+	$('#zp-prod-info-upload form input[type="file"]').attr('name',prod_type)
+	$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的'+prod_type1+'。Tips: .doc .docx .txt .xlsx .xls')
+
+	$('#zp-prod-info').modal('show');	
+	$.post(url,{offer_id:offer_id},function(data,status){
+		if(status){
+			$('#zp-prod-info .modal-body tbody tr').remove()
+			if(data.length>0){
+				data.forEach(function(e){
+					ht = '<tr class="info">'
+					ht += '<td class="col-md-8">'+e+'</td>'
+					ht += '<td class="col-md-2"><a title="下载" act="download" href="#"><span class="glyphicon glyphicon-download-alt"></span></a></td>'
+					ht += '<td class="col-md-2"><a title="删除" href="#" act="remove" ><span class="glyphicon glyphicon-remove"></span></a></td>'
+					ht += '</tr>'
+					$('#zp-prod-info .modal-body tbody').append(ht)
+				});
+				reload_zp_prod_info_download()					
+			}else{
+				swal('查无！',{button:false})
+			}
+		}else{
+			swal('查询错误！',{button:false})
+		}
+	});	
+}
+
 
 // 查看专线产品信息(介绍、管理办法、资费、操作流程)-需重载函数
 reload_zp_prod_info_click=function(){
@@ -239,37 +307,22 @@ reload_zp_prod_info_click=function(){
 		$('#zp-prod-info-upload form input[type="file"]').attr('data_prod',offer_id)
 
 		if($(this).text().trim()=='产品介绍'){
-			$('#zp-prod-info .modal-header h4').text(modal_title)			
-			$('#zp-prod-info-upload form input[type="file"]').attr('name','desc')
-			$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的介绍文档。Tips: .doc .docx .txt .xlsx .xls')
-			// $.post('/get-zb-prod-info-desc',{offer_id:offer_id},function(data,status){
-				
-			// });
-			$('#zp-prod-info').modal('show');
+			get_zb_prod_infos('/get-zb-prod-desc',offer_id,modal_title,'desc','介绍文档')
 		}
 		if($(this).text().trim()=='产品资费'){
-			$('#zp-prod-info .modal-header h4').text(modal_title)
-			$('#zp-prod-info-upload form input[type="file"]').attr('name','fee')
-			$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的资费文档。Tips: .doc .docx .txt .xlsx .xls')
-			
-			$('#zp-prod-info').modal('show');			
+			get_zb_prod_infos('/get-zb-prod-fee',offer_id,modal_title,'fee','资费文档')		
 		}
 		if($(this).text().trim()=='管理办法'){
-			$('#zp-prod-info .modal-header h4').text(modal_title)
-			$('#zp-prod-info-upload form input[type="file"]').attr('name','man')			
-			$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的管理文档。Tips: .doc .docx .txt .xlsx .xls')
-			
-			$('#zp-prod-info').modal('show');			
+			get_zb_prod_infos('/get-zb-prod-man',offer_id,modal_title,'man','管理文档')
 		}
 		if($(this).text().trim()=='操作流程'){
-			$('#zp-prod-info .modal-header h4').text(modal_title)
-			$('#zp-prod-info-upload form input[type="file"]').attr('name','op')
-			$('#zp-prod-info-upload .modal-body p').text('请上传关于此产品的操作文档。Tips: .doc .docx .txt .xlsx .xls')
-			
-			$('#zp-prod-info').modal('show');
+			get_zb_prod_infos('/get-zb-prod-op',offer_id,modal_title,'op','操作文档')
 		}						
 	});
+
 }
+
+
 
 // 设置待维护账单科目 html 部分
 function append_item_html(item_name,item_id,eff_date,op_date,cur_m_fee,last_m_fee,last2_m_fee){
@@ -333,7 +386,8 @@ function append_zb_prod_html(offer_id,offer_name,eff_date,catg_name1,catg_name2,
 	ht += '<a href="#" data_prod="'+offer_id+'" >产品介绍 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
 	ht += '<a href="#" data_prod="'+offer_id+'" >产品资费 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
 	ht += '<a href="#" data_prod="'+offer_id+'" >管理办法 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
-	ht += '<a href="#" data_prod="'+offer_id+'" >操作流程 <span class="glyphicon glyphicon-new-window"></span></a>'	
+	ht += '<a href="#" data_prod="'+offer_id+'" >操作流程 <span class="glyphicon glyphicon-new-window"></span></a><span class="glyphicon glyphicon-option-vertical"></span>'
+	ht += '<a href="#" data_prod="'+offer_id+'" >近期维护 <span class="glyphicon glyphicon-new-window"></span></a>'	
 	ht += '</li></ul>'
 	return ht
 }

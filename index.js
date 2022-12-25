@@ -1020,7 +1020,7 @@ app.get('/downlowd-zb-prod',function(req,resp){
 
 
 // 专线专区-文件上传
-app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{name:'op'}]),urlencodedParser,function (req, res) {
+app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{name:'op'}]),urlencodedParser,function (req, resp) {
   let file_type = req.files['fee']!=null?'fee':(req.files['desc']!=null?'desc':(req.files['man']!=null?'man':'op'))
   let new_path = req.files['fee']!=null?'upload/zx_product/fee/':(req.files['desc']!=null?'upload/zx_product/desc/':(req.files['man']!=null?'upload/zx_product/man/':'upload/zx_product/op/'))
   req.files[file_type][0].originalname = Buffer.from(req.files[file_type][0].originalname, "latin1").toString("utf8")
@@ -1034,18 +1034,171 @@ app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{
   let newName = new_path+'/'+req.files[file_type][0].originalname;  // 指定文件路径和文件名
   let t_arr = ['doc','docx','xlsx','xls','txt','md']
   let f_li = fs.readdirSync(new_path)
-  if(t_arr.filter(function(e){return e==tail}).length>0&&f_li.filter(function(e){return e==file_name}).length==0){
-    // 3. 将上传后的文件重命名
-    fs.renameSync(oldName, newName);
-    // 4. 文件上传成功,返回上传成功后的文件路径
-    res.send("上传成功！请重新进入查看文件列表。");
+
+  if(req.cookies.session!=null){
+      sess = Buffer.from(util.inspect(req.cookies.session),'base64')
+      sess = JSON.parse(sess)
+      var key = fs.readFileSync('./session/'+sess['uname']+'.txt');
+      if(key==sess['key']){
+        if(t_arr.filter(function(e){return e==tail}).length>0&&f_li.filter(function(e){return e==file_name}).length==0){
+          // 3. 将上传后的文件重命名
+          fs.renameSync(oldName, newName);
+          fs.open(new_path+'/log.txt', 'a+', function(err, fd) {
+             if (err) {
+                 return console.error(err);
+             }
+             fs.writeFile(fd, sess['uname']+'|新增|'+file_name+'|'+date.format(dates,'YYYY-MM-DD HH:mm:ss')+'\n',  function(err) {
+              if(err){
+                return console.error(err);
+              }
+             });
+          });          
+          // 4. 文件上传成功,返回上传成功后的文件路径
+          resp.send("上传成功！请重新进入查看文件列表。");
+        }else{
+          fs.unlinkSync(oldName)
+          resp.send('上传失败！文件类型错误或文件名重复。');
+        }
+      }else{
+        resp.send('请登录后操作！')
+      }
   }else{
-    fs.unlinkSync(oldName)
-    res.send('上传失败！文件类型错误或文件名重复。');
+    resp.send('请登录后操作！')
   }
 
 })
 
+// 专线专区-查看产品介绍
+app.post('/get-zb-prod-desc',urlencodedParser,function(req,resp){
+  desc_path = 'upload/zx_product/desc/'+req.body.offer_id
+  if(!fs.existsSync(desc_path)){
+    resp.json('')
+  }else{
+    f_li = fs.readdirSync(desc_path)
+    f_li.forEach(function(e){
+      if(e=='log.txt'){
+        f_li.splice(f_li.indexOf(e),1)
+      }
+    })
+    resp.json(f_li)
+  }
+})
+
+
+// 专线专区-查看产品资费
+app.post('/get-zb-prod-fee',urlencodedParser,function(req,resp){
+  offer_id = req.body.offer_id
+  desc_path = 'upload/zx_product/fee/'+offer_id
+  if(!fs.existsSync(desc_path)){
+    resp.json('')
+  }else{
+    f_li = fs.readdirSync(desc_path)
+    f_li.forEach(function(e){
+      if(e=='log.txt'){
+        f_li.splice(f_li.indexOf(e),1)
+      }
+    })
+    resp.json(f_li)
+  }
+})
+
+
+// 专线专区-查看产品管理办法
+app.post('/get-zb-prod-man',urlencodedParser,function(req,resp){
+  offer_id = req.body.offer_id
+  desc_path = 'upload/zx_product/man/'+offer_id
+  if(!fs.existsSync(desc_path)){
+    resp.json('')
+  }else{
+    f_li = fs.readdirSync(desc_path)
+    f_li.forEach(function(e){
+      if(e=='log.txt'){
+        f_li.splice(f_li.indexOf(e),1)
+      }
+    })
+    resp.json(f_li)
+  }
+})
+
+
+// 专线专区-查看产品操作流程
+app.post('/get-zb-prod-op',urlencodedParser,function(req,resp){
+  offer_id = req.body.offer_id
+  desc_path = 'upload/zx_product/op/'+offer_id
+  if(!fs.existsSync(desc_path)){
+    resp.json('')
+  }else{
+    f_li = fs.readdirSync(desc_path)
+    f_li.forEach(function(e){
+      if(e=='log.txt'){
+        f_li.splice(f_li.indexOf(e),1)
+      }
+    })
+    resp.json(f_li)
+  }
+})
+
+
+// 专线专区-帮助文档下载
+app.get('/download-zb-prod-doc',function(req,resp){
+  offer_id = req.query.offer_id
+  prod_type = req.query.prod_type
+  filename = req.query.filename
+  dest_path = 'upload/zx_product/'
+  dest_path += prod_type=='desc'?'desc/':(prod_type=='fee'?'fee/':(prod_type=='man'?'man/':'op/'))
+  dest_path += offer_id
+  dest_path += '/'
+  dest_path += filename
+  filename = encodeURIComponent(filename)
+  resp.set({'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename='+filename})
+  // 创建一个可读流
+  readerStream = fs.createReadStream(dest_path);
+  // 管道读写操作
+  readerStream.pipe(resp);
+});
+
+
+// 专线专区-帮助文档删除
+app.post('/remove-zb-prod-doc',urlencodedParser,function(req,resp){
+  offer_id = req.body.offer_id
+  prod_type = req.body.prod_type
+  filename = req.body.filename
+  dest_path = 'upload/zx_product/'
+  dest_path += prod_type=='desc'?'desc/':(prod_type=='fee'?'fee/':(prod_type=='man'?'man/':'op/'))
+  dest_path += offer_id
+  dest_path += '/'
+  dest_dir = dest_path
+  dest_path += filename
+  dates = new Date()
+  try{
+    if(req.cookies.session!=null){
+        sess = Buffer.from(util.inspect(req.cookies.session),'base64')
+        sess = JSON.parse(sess)
+        var key = fs.readFileSync('./session/'+sess['uname']+'.txt');
+        if(key==sess['key']){
+          fs.unlinkSync(dest_path)
+          fs.open(dest_dir+'log.txt', 'a+', function(err, fd) {
+             if (err) {
+                 return console.error(err);
+             }
+             fs.writeFile(fd, sess['uname']+'|删除|'+filename+'|'+date.format(dates,'YYYY-MM-DD HH:mm:ss')+'\n',  function(err) {
+              if(err){
+                return console.error(err);
+              }
+             });            
+          });
+          resp.send('已删除!')
+        }else{
+          resp.send('请登录后操作！')
+        }
+    }else{
+      resp.send('请登录后操作！')
+    }
+  }catch(err){
+    console.error(err);
+    resp.send('删除失败!')
+  }
+});
 
 
 // 服务启动监听端口:7777
