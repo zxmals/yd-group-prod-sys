@@ -247,7 +247,8 @@ app.post('/getctginfo',function(req,resp){
       console.log(err.message)
       return
     }
-    max_date = new Date(res[0]['op_time']).toLocaleString().split(' ')[0].replace(/\//g,'-')
+    max_date = new Date(res[0]['op_time'])
+    max_date = date.format(max_date,'YYYY-MM-DD')
     call = function(err,res){
       if(err){
         console.log(err.message)
@@ -1044,7 +1045,20 @@ app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{
       if(key==sess['key']){
         if(t_arr.filter(function(e){return e==tail}).length>0&&f_li.filter(function(e){return e==file_name}).length==0){
           // 3. 将上传后的文件重命名
-          fs.renameSync(oldName, newName);
+          // fs.renameSync(oldName, newName);
+          // Read the file
+          fs.readFile(oldName, function (err, data) {
+              if (err) throw err;
+              // Write the file
+              fs.writeFile(newName, data, function (err) {
+                  if (err) throw err;
+              });
+              // Delete the file
+              fs.unlink(oldName, function (err) {
+                  if (err) throw err;
+              });
+          });
+
           fs.open(new_path+'/log.txt', 'a+', function(err, fd) {
              if (err) {
                  return console.error(err);
@@ -1058,8 +1072,7 @@ app.post('/file_upload',upload.fields([{name:'fee'},{name:'desc'},{name:'man'},{
           });
           // 4. 文件上传成功,返回上传成功后的文件路径
           resp.send("上传成功!");
-        }else{
-          fs.unlinkSync(oldName)
+        }else{          
           resp.send('上传失败！文件类型错误或文件名重复。');
         }
       }else{
