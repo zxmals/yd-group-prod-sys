@@ -859,7 +859,7 @@ app.post('/get-zb-prod-info-ctg',urlencodedParser,function(req,resp){
   ctg_4 = req.body.ctg4
   ctg_5 = req.body.ctg5
   sql = 
-    " select count(1)cnts "+
+    " select * "+
     " from ( "+
     "   select  a.offer_id,a.offer_name,a.eff_date "+
     "   ,b.catg_name1,b.catg_name2,b.catg_name3,b.catg_name4,b.catg_name5,a.biz_code "+
